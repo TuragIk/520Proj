@@ -1,2 +1,9 @@
-# 520Proj
-Group 19 Project Repo for CS520 Spring 2026 @UMass. Group members: Kevin Mathews, Rohit Joshi, Tyler Callahan, Turag Ikbal
+# 520 Proj
+
+TODO:
+- Add names and github usernames
+- Consise description of project
+- 4 Major system features
+- 8 Formal use cases
+- 3 Measurable system contstraints
+- 3 Key risks
