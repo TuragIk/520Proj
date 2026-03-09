@@ -11,7 +11,7 @@ TODO:
 Turag Ikbal/turagik
 Rohit Joshi/roheetyeet
 Tyler Callahan/tylercallahan1
-Keivn Mathew/kevinmathew23
+Kevin Mathew/kevinmathew23
 
 ## Team Name
 Dynamite Gambling
