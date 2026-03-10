@@ -26,6 +26,11 @@ Despite the legal age of gambling in Massachusetts being 21 years old, many stud
 Due to the high accessibility and predatory tactics of these prediction markets (risk free bets, celebrity sponsorships, time sensitive bets, insider information), we have seen many UMass and Five College students succumb to gambling addictions and make hasty, uninformed decisions. We seek to create a third party platform that aggregates information from prediction markets, namely Kalshi and Polymarket for the scope of this project, and allows students to see all available information on their bets. The primary objectives are that students can make informed decisions on their bets by seeing all available options, and it allows us to give warnings if students are placing bets at too high a frequency. In doing so, we hope to aid the Five College Community in making smarter choices regarding gambling.
 
 ## 1.2 Features
+
+
+
+
+
 ## 1.3 Functional Requirements
 
 | ID | Requirement Name | Actor | Trigger | Success Scenario | Failure Scenario |
@@ -44,6 +49,32 @@ Due to the high accessibility and predatory tactics of these prediction markets 
 As a result of this support constraint, and additional parameter must be added into non-functional requirement #1, being: A middle-of-the-way caching system to support high user loads but in the backend we are still restricted by Kalshi and Polymarket rate limits. There will be strict Time-To-Live of under 15-20 seconds (will vary depending on users online (longer times for less users, shorter when more users)
 * Let’s add a security constraint. Since we are dealing with user accounts and sensitive data, the system must encrypt all passwords and accounts behind AES-256 onto the server storage. Also, all data transmitted between a client and server must be on a secured TLS 1.3 channel.
 ## 1.5 Challenges & Risks
+
+### 1. Data Scalability and Performance
+Prediction market prices can update frequently, and storing historical price changes or monitoring
+multiple markets could create growing data volumes and performance challenges as the platform scales.
+
+**Solution:** Use scalable cloud infrastructure, caching, and efficient databases to handle frequent
+updates and ensure the platform can process and display odds comparisons quickly.
+
+---
+
+### 2. Integration Challenges with Gambling Providers
+Kalshi and Polymarket provide data through different APIs and formats, which can make it difficult
+to consistently retrieve and compare market prices across the two platforms.
+
+**Solution:** Build a small integration layer that connects to each platform's API and converts
+their data into a standardized internal format so prices and markets can be compared reliably.
+
+---
+
+### 3. Technical Limitations in Odds Comparison and Transparency
+Prediction markets often present odds in different formats and structures, which can make direct
+comparisons difficult or misleading for users.
+
+**Solution:** Implement a data normalization layer that converts all odds into a standardized format
+and aligns similar betting markets to enable clear, transparent comparisons across providers.
+
 
 
 ## Tentative Folder Structure
