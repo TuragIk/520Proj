@@ -29,3 +29,24 @@ TODO:
 As a result of this support constraint, and additional parameter must be added into non-functional requirement #1, being: A middle-of-the-way caching system to support high user loads but in the backend we are still restricted by Kalshi and Polymarket rate limits. There will be strict Time-To-Live of under 15-20 seconds (will vary depending on users online (longer times for less users, shorter when more users)
 * Let’s add a security constraint. Since we are dealing with user accounts and sensitive data, the system must encrypt all passwords and accounts behind AES-256 onto the server storage. Also, all data transmitted between a client and server must be on a secured TLS 1.3 channel.
 ## 1.5 Challenges & Risks
+
+
+## Tentative Folder Structure
+```
+520Proj/
+├── .gitignore               
+├── README.md                # Project overview/documentation
+├── docs/                    # Course documentation
+│   ├── 520-ProjectDocument.pdf
+├── frontend/                
+│   ├── public/              
+│   └── src/
+│       ├── components/      # UI pieces
+│       └── pages/           # (Dashboard, Login, etc)
+├── backend/                 # API, caching, data processing 
+│   ├── src/
+│   │   ├── api/             # Internal endpoints for the frontend
+│   │   ├── db/              # Database connections and query logic
+│   │   └── cache/           # Caching logic
+│   └── tests/               # Testing suite
+```
