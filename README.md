@@ -27,9 +27,14 @@ Due to the high accessibility and predatory tactics of these prediction markets 
 
 ## 1.2 Features
 
-
-
-
+- **User Authentication and Login**
+   - Users will be able to log in with their passwords and check to see if they have placed any bets, and the status of those bets.
+- **Safe Betting Dashboard**
+   - Users will be able to see total volume across all websites for specific bets, and which websites are providing the best odds on any bets they want to take.
+- **Email Notification**
+   - Our api will check the users placed bets and automatically email them if the bet closes, and the results of the bet.
+- **Safe Betting System**
+   - Users can set max monetary betting and max bets per day in order to refrain from falling for predatory gambling tactics, and practice moderation so no harmful decisions are made.
 
 ## 1.3 Functional Requirements
 
