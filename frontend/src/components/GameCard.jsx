@@ -1,5 +1,5 @@
 import { theme } from "../theme";
-import { fmtDate, fmtTime } from "../utils/formatters";
+import { fmtDate, fmtTime, fmtVol } from "../utils/formatters";
 import MarketRow from "./MarketRow";
 
 export default function GameCard({ game }) {
@@ -51,7 +51,10 @@ export default function GameCard({ game }) {
               fontFamily: theme.fonts.body,
             }}
           >
-            {fmtDate(game.date)} · {fmtTime(game.date)}
+            {fmtDate(game.date)} · {fmtTime(game.date)} · Total Volume:{" "}
+            <span style={{ color: theme.colors.accent, fontFamily: theme.fonts.mono }}>
+              {fmtVol(game.markets.reduce((sum, m) => sum + m.volume, 0))}
+            </span>
           </p>
         </div>
         {game.arbitrage.exists && (
