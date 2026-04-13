@@ -86,18 +86,19 @@ and aligns similar betting markets to enable clear, transparent comparisons acro
 ```
 520Proj/
 ├── .gitignore               
-├── README.md                # Project overview/documentation
-├── docs/                    # Course documentation
-│   ├── 520-ProjectDocument.pdf
+├── README.md                
+├── docs/                    
+│   └── 520-ProjectDocument.pdf
 ├── frontend/                
-│   ├── public/              
+│   ├── package.json
 │   └── src/
-│       ├── components/      # UI pieces
-│       └── pages/           # (Dashboard, Login, etc)
-├── backend/                 # API, caching, data processing 
-│   ├── src/
-│   │   ├── api/             # Internal endpoints for the frontend
-│   │   ├── db/              # Database connections and query logic
-│   │   └── cache/           # Caching logic
-│   └── tests/               # Testing suite
+└── backend/                 
+    ├── requirements.txt     # Python dependencies (fastapi, uvicorn, etc.)
+    ├── src/
+    │   ├── main.py          # FastAPI application entry point
+    │   ├── api/             # API routing (e.g., markets.py, auth.py)
+    │   ├── core/            # Config, security, middleware
+    │   ├── db/              # Database models and connections
+    │   └── services/        # Caching and external API normalizers
+    └── tests/
 ```
