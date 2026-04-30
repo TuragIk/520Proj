@@ -9,6 +9,14 @@ ESPN_SCOREBOARD_URL = (
     "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard"
 )
 
+# ESPN uses shortened abbreviations for a few teams that differ from the
+# standard NBA 3-letter codes used by Kalshi and Polymarket.
+ESPN_ABBR_OVERRIDES = {
+    "NY": "NYK",
+    "GS": "GSW",
+    "NO": "NOP",
+}
+
 
 class GameMatchup(TypedDict):
     game_id: str
@@ -62,6 +70,10 @@ def fetch_games_next_24h() -> list[GameMatchup]:
 
                 home_abbr = home.get("team", {}).get("abbreviation", "")
                 away_abbr = away.get("team", {}).get("abbreviation", "")
+
+                # Normalize ESPN-specific shortened codes to standard NBA abbreviations
+                home_abbr = ESPN_ABBR_OVERRIDES.get(home_abbr, home_abbr)
+                away_abbr = ESPN_ABBR_OVERRIDES.get(away_abbr, away_abbr)
 
                 home_data = NBA_TEAMS.get(home_abbr)
                 away_data = NBA_TEAMS.get(away_abbr)
