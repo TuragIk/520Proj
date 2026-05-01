@@ -3,12 +3,14 @@ from fastapi import FastAPI
 from .api.schedule import router as schedule_router
 from .api.kalshi import router as kalshi_router
 from .api.polymarket import router as polymarket_router
+from .api.markets_unified import router as markets_router
 
 app = FastAPI(title="Dynamite Gambling API")
 
 app.include_router(schedule_router)
 app.include_router(kalshi_router)
 app.include_router(polymarket_router)
+app.include_router(markets_router)
 
 @app.get("/")
 async def root():
