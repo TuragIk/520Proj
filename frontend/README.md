@@ -1,16 +1,40 @@
-# React + Vite
+# Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + Vite frontend for Dynamite Gambling. Displays live NBA odds aggregated from Kalshi and Polymarket, lets users track placed bets, and enforces configurable safety limits.
 
-Currently, two official plugins are available:
+## Prerequisites
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Node.js 18+
 
-## React Compiler
+## Setup
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+```bash
+# From the frontend/ directory
+npm install
+```
 
-## Expanding the ESLint configuration
+## Running
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```bash
+npm run dev
+```
+
+The app will be available at `http://localhost:5173`.
+
+## Building for Production
+
+```bash
+npm run build
+```
+
+Output is written to `dist/`.
+
+## Backend Connection
+
+The frontend consumes the backend API. Make sure the backend is running at `http://localhost:8000` before starting the dev server. The primary endpoint used is:
+
+```
+GET http://localhost:8000/markets
+```
+
+See [backend/README.md](../backend/README.md) for backend setup instructions.

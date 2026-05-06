@@ -34,8 +34,13 @@ def fetch_games_next_24h() -> list[GameMatchup]:
     now = datetime.now(timezone.utc)
     cutoff = now + timedelta(hours=24)
 
-    # Query both today and tomorrow in case the 24h window spans midnight UTC
-    dates = {now.strftime("%Y%m%d"), cutoff.strftime("%Y%m%d")}
+    # ESPN scoreboard uses Eastern dates, not UTC. Compute dates in EDT (UTC-4)
+    # so late-night games (e.g. 9:30 PM EDT = 1:30 AM UTC next day) are found.
+    eastern = timezone(timedelta(hours=-4))
+    dates = {
+        now.astimezone(eastern).strftime("%Y%m%d"),
+        cutoff.astimezone(eastern).strftime("%Y%m%d"),
+    }
 
     games: list[GameMatchup] = []
     with httpx.Client(timeout=10.0) as client:
