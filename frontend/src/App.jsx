@@ -1,26 +1,38 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Header from "./components/Header";
 import GameCard from "./components/GameCard";
-import { MOCK_GAMES } from "./data/mockData";
+import { getAllMarkets } from "./api/markets";
 import { theme } from "./theme";
 
 function App() {
+  const [games, setGames] = useState([]);
+  const [dataSource, setDataSource] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
-  const sorted = [...MOCK_GAMES].sort((a, b) => {
-    const totalA = a.markets.reduce((sum, m) => sum + m.volume, 0);
-    const totalB = b.markets.reduce((sum, m) => sum + m.volume, 0);
-    return totalB - totalA;
+  useEffect(() => {
+    getAllMarkets().then(({ games: g, source }) => {
+      setGames(g);
+      setDataSource(source);
+      setLoading(false);
+    });
+  }, []);
+
+  const sorted = [...games].sort((a, b) => {
+    const volA = (a.volume?.kalshi ?? 0) + (a.volume?.polymarket ?? 0);
+    const volB = (b.volume?.kalshi ?? 0) + (b.volume?.polymarket ?? 0);
+    return volB - volA;
   });
 
-  const filtered = sorted.filter(
-    (g) =>
-      g.event_name.toLowerCase().includes(search.toLowerCase()) ||
-      g.team_a.name.toLowerCase().includes(search.toLowerCase()) ||
-      g.team_b.name.toLowerCase().includes(search.toLowerCase()) ||
-      g.team_a.abbr.toLowerCase().includes(search.toLowerCase()) ||
-      g.team_b.abbr.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = sorted.filter((g) => {
+    const q = search.toLowerCase();
+    return (
+      g.home.name.toLowerCase().includes(q) ||
+      g.away.name.toLowerCase().includes(q) ||
+      g.home.abbr.toLowerCase().includes(q) ||
+      g.away.abbr.toLowerCase().includes(q)
+    );
+  });
 
   return (
     <div
@@ -32,6 +44,49 @@ function App() {
     >
       <Header />
       <div style={{ maxWidth: 960, margin: "0 auto", padding: "24px 20px" }}>
+        {/* Source badge */}
+        {dataSource && (
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              marginBottom: 16,
+              padding: "4px 10px",
+              borderRadius: 6,
+              fontSize: 11,
+              fontWeight: 600,
+              background:
+                dataSource === "live"
+                  ? `${theme.colors.green}15`
+                  : `${theme.colors.warning}15`,
+              color:
+                dataSource === "live"
+                  ? theme.colors.green
+                  : theme.colors.warning,
+              border: `1px solid ${
+                dataSource === "live"
+                  ? `${theme.colors.green}30`
+                  : `${theme.colors.warning}30`
+              }`,
+            }}
+          >
+            <span
+              style={{
+                width: 6,
+                height: 6,
+                borderRadius: "50%",
+                background:
+                  dataSource === "live"
+                    ? theme.colors.green
+                    : theme.colors.warning,
+              }}
+            />
+            {dataSource === "live" ? "Live data" : "Mock data — backend offline"}
+          </div>
+        )}
+
+        {/* Search */}
         <div style={{ position: "relative", marginBottom: 20 }}>
           <span
             style={{
@@ -47,7 +102,7 @@ function App() {
           </span>
           <input
             type="text"
-            placeholder="Search NBA games... (e.g. Celtics, LAL, Warriors)"
+            placeholder="Search teams… (e.g. Celtics, LAL, Thunder)"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             style={{
@@ -60,11 +115,24 @@ function App() {
               fontSize: 14,
               fontFamily: theme.fonts.body,
               outline: "none",
+              boxSizing: "border-box",
             }}
           />
         </div>
 
-        {filtered.length === 0 ? (
+        {/* Game list */}
+        {loading ? (
+          <div
+            style={{
+              textAlign: "center",
+              padding: 60,
+              color: theme.colors.textDim,
+            }}
+          >
+            <div style={{ fontSize: 28, marginBottom: 8 }}>⏳</div>
+            <p style={{ fontSize: 14 }}>Loading markets…</p>
+          </div>
+        ) : filtered.length === 0 ? (
           <div
             style={{
               textAlign: "center",
@@ -73,10 +141,14 @@ function App() {
             }}
           >
             <div style={{ fontSize: 32, marginBottom: 8 }}>🏀</div>
-            <p style={{ fontSize: 14 }}>No games found matching "{search}"</p>
+            <p style={{ fontSize: 14 }}>
+              {search
+                ? `No games matching "${search}"`
+                : "No games available right now"}
+            </p>
           </div>
         ) : (
-          filtered.map((game) => <GameCard key={game.id} game={game} />)
+          filtered.map((game) => <GameCard key={game.game_id} game={game} />)
         )}
       </div>
     </div>
