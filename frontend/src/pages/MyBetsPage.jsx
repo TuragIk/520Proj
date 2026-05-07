@@ -2,11 +2,47 @@ import { theme } from "../theme";
 import { fmtTime, fmtDate } from "../utils/formatters";
 import PlatformBadge from "../components/PlatformBadge";
 
-export default function MyBetsPage({ bets, limits }) {
+export default function MyBetsPage({ bets, limits, user, onLoginClick }) {
   const openBets = bets.filter((b) => b.status === "open");
-  const todayBets = bets.filter((b) => {
-    return new Date(b.placed_at).toDateString() === new Date().toDateString();
-  });
+
+  if (!user) {
+    return (
+      <div style={{ maxWidth: 960, margin: "0 auto", padding: "24px 20px" }}>
+        <h2 style={{ margin: "0 0 20px", fontSize: 20, fontWeight: 700, color: theme.colors.text, fontFamily: theme.fonts.body }}>
+          My Bets
+        </h2>
+        <div
+          style={{
+            textAlign: "center",
+            padding: 60,
+            color: theme.colors.textDim,
+            background: theme.colors.surface,
+            borderRadius: 14,
+            border: `1px solid ${theme.colors.border}`,
+          }}
+        >
+          <div style={{ fontSize: 32, marginBottom: 12 }}>🔒</div>
+          <p style={{ fontSize: 14, margin: "0 0 20px" }}>Sign in to view your bet history and daily stats.</p>
+          <button
+            onClick={onLoginClick}
+            style={{
+              background: theme.colors.accent,
+              border: "none",
+              borderRadius: 8,
+              padding: "10px 24px",
+              color: "#000",
+              fontSize: 13,
+              fontWeight: 700,
+              cursor: "pointer",
+              fontFamily: theme.fonts.body,
+            }}
+          >
+            Sign In
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ maxWidth: 960, margin: "0 auto", padding: "24px 20px" }}>

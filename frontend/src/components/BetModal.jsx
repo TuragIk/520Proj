@@ -10,7 +10,7 @@ function platformUrl(platform) {
   return "https://polymarket.com/sports/basketball";
 }
 
-export default function BetModal({ game, limits, onClose, onBetLogged }) {
+export default function BetModal({ game, limits, user, onClose, onBetLogged, onLoginClick }) {
   const [platform, setPlatform] = useState("kalshi");
   const [team, setTeam] = useState(game.home.abbr);
   const [amount, setAmount] = useState("");
@@ -134,7 +134,41 @@ export default function BetModal({ game, limits, onClose, onBetLogged }) {
           Log a Bet
         </p>
 
-        {locked ? (
+        {!user ? (
+          <div
+            style={{
+              padding: "16px 18px",
+              borderRadius: 10,
+              background: `${theme.colors.accent}0a`,
+              border: `1px solid ${theme.colors.accent}30`,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 12,
+            }}
+          >
+            <span style={{ fontSize: 13, color: theme.colors.textDim, fontFamily: theme.fonts.body }}>
+              Sign in to log bets and track your history.
+            </span>
+            <button
+              onClick={onLoginClick}
+              style={{
+                background: theme.colors.accent,
+                border: "none",
+                borderRadius: 6,
+                padding: "7px 14px",
+                color: "#000",
+                fontSize: 12,
+                fontWeight: 700,
+                cursor: "pointer",
+                fontFamily: theme.fonts.body,
+                flexShrink: 0,
+              }}
+            >
+              Sign In
+            </button>
+          </div>
+        ) : locked ? (
           <div
             style={{
               background: `${theme.colors.warning}10`,

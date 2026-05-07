@@ -4,8 +4,10 @@ import GameCard from "./components/GameCard";
 import BetModal from "./components/BetModal";
 import MyBetsPage from "./pages/MyBetsPage";
 import LimitBanner, { isAtLimit } from "./components/LimitBanner";
+import LoginModal from "./components/LoginModal";
 import { getAllMarkets } from "./api/markets";
 import { getBets, getLimits } from "./api/bets";
+import { getUser, logout } from "./api/auth";
 import { theme } from "./theme";
 
 function App() {
@@ -17,6 +19,18 @@ function App() {
   const [limits, setLimits] = useState(() => getLimits());
   const [page, setPage] = useState("home");
   const [bets, setBets] = useState(() => getBets());
+  const [user, setUser] = useState(() => getUser());
+  const [showLogin, setShowLogin] = useState(false);
+
+  function handleLogin(loggedInUser) {
+    setUser(loggedInUser);
+    setShowLogin(false);
+  }
+
+  function handleLogout() {
+    logout();
+    setUser(null);
+  }
 
   useEffect(() => {
     getAllMarkets().then(({ games: g, source }) => {
@@ -53,9 +67,16 @@ function App() {
         fontFamily: theme.fonts.body,
       }}
     >
-      <Header page={page} onNavigate={setPage} betsCount={bets.length} />
+      <Header
+        page={page}
+        onNavigate={setPage}
+        betsCount={bets.length}
+        user={user}
+        onLoginClick={() => setShowLogin(true)}
+        onLogout={handleLogout}
+      />
       {page === "bets" ? (
-        <MyBetsPage bets={bets} limits={limits} />
+        <MyBetsPage bets={bets} limits={limits} user={user} onLoginClick={() => setShowLogin(true)} />
       ) : (
       <div style={{ maxWidth: 960, margin: "0 auto", padding: "24px 20px" }}>
         {/* Limit warning */}
@@ -176,9 +197,15 @@ function App() {
         <BetModal
           game={selectedGame}
           limits={limits}
+          user={user}
           onClose={() => setSelectedGame(null)}
           onBetLogged={(updatedLimits) => { setLimits(updatedLimits); setBets(getBets()); }}
+          onLoginClick={() => { setSelectedGame(null); setShowLogin(true); }}
         />
+      )}
+
+      {showLogin && (
+        <LoginModal onLogin={handleLogin} onClose={() => setShowLogin(false)} />
       )}
     </div>
   );
