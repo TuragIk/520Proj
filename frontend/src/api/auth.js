@@ -1,3 +1,8 @@
+// Handles user authentication against the FastAPI backend (POST /auth/login).
+// Token and username are persisted in localStorage so sessions survive page refreshes.
+// When the backend is unreachable the login falls back to a mock — any non-empty
+// credentials succeed — so the full auth UI can be demonstrated without the server.
+
 const TOKEN_KEY = "dg_token";
 const USER_KEY = "dg_user";
 const AUTH_BASE = "http://localhost:8000";

@@ -1,3 +1,7 @@
+// Shown on the home page when the user has hit their daily bet or spending limit.
+// isAtLimit() is exported so BetModal and App can check the same condition without
+// duplicating the logic.
+
 import { theme } from "../theme";
 
 export function isAtLimit(limits) {

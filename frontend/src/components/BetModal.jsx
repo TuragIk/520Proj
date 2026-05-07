@@ -1,3 +1,8 @@
+// Modal opened when a user clicks a game card. Contains two sections:
+//   1. Platform links — always visible; lets anyone open the market on Kalshi or Polymarket.
+//   2. Log a Bet — gated: shows a sign-in prompt if logged out, a limit lockout with
+//      gambling resources if the daily limit is hit, or the bet form otherwise.
+
 import { useState } from "react";
 import { theme } from "../theme";
 import { fmtDate, fmtTime, pct } from "../utils/formatters";

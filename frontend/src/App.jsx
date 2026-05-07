@@ -1,3 +1,13 @@
+// Root component. Owns all top-level state:
+//   games/loading/dataSource — fetched from GET /markets on mount, falls back to mock
+//   search                   — client-side filter across team names and abbreviations
+//   selectedGame             — drives BetModal (null = closed)
+//   bets/limits              — localStorage-backed; refreshed after each bet is logged
+//   user/showLogin           — auth state; user persists across refreshes via localStorage
+//   page                     — "home" | "bets"; controls which view is rendered
+//
+// Games are filtered to upcoming only (game_time > now) so started games are hidden.
+
 import { useState, useEffect } from "react";
 import Header from "./components/Header";
 import GameCard from "./components/GameCard";

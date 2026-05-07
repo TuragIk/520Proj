@@ -1,3 +1,7 @@
+// Clickable card for a single game. Shows away @ home with team colors, date/time,
+// total volume, and an arbitrage badge if one exists. Renders one MarketRow per
+// platform (Kalshi, Polymarket). Calls onSelect(game) when clicked to open BetModal.
+
 import { theme } from "../theme";
 import { fmtDate, fmtTime, fmtVol } from "../utils/formatters";
 import MarketRow from "./MarketRow";

@@ -1,3 +1,7 @@
+// Sticky top navigation bar. Left: app name and tagline. Right: NBA sport badge,
+// Markets/My Bets nav buttons, and auth controls (Sign In button or username + Sign Out).
+// The My Bets button shows a count badge when the user has logged bets.
+
 import { theme } from "../theme";
 
 export default function Header({ page, onNavigate, betsCount, user, onLoginClick, onLogout }) {

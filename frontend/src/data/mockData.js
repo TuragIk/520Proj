@@ -1,3 +1,8 @@
+// Static mock data used when the backend is offline.
+// Matches the NormalizedGame shape returned by GET /markets, extended with
+// display-only fields (volume, platform_ids) that the real API doesn't include yet.
+// All game times are computed relative to now so they always appear as upcoming games.
+
 import { teamColor } from "./teamData";
 
 function hoursFromNow(h) {

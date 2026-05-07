@@ -1,3 +1,8 @@
+// "My Bets" page showing the user's bet history and daily usage stats.
+// Shows a login prompt if the user isn't authenticated.
+// Stats (bets today, spent today, open bets) turn amber when the daily limit is approached.
+// Bets are read from localStorage via getBets() in App and passed down as props.
+
 import { theme } from "../theme";
 import { fmtTime, fmtDate } from "../utils/formatters";
 import PlatformBadge from "../components/PlatformBadge";

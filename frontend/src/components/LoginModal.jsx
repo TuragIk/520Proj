@@ -1,3 +1,7 @@
+// Full-screen overlay login form. Calls auth.login() which hits the backend
+// and falls back to a mock (any credentials work) when the server is offline.
+// Fires onLogin(user) on success so App can update its auth state.
+
 import { useState } from "react";
 import { theme } from "../theme";
 import { login } from "../api/auth";

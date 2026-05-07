@@ -1,3 +1,12 @@
+// localStorage-based bet storage used until backend auth and DB wiring are complete.
+// Daily limits (max 5 bets, $50) reset automatically at midnight local time —
+// getLimits() compares the stored date string against today's and returns fresh
+// zeros if they don't match, so no scheduled job is needed.
+//
+// localStorage keys:
+//   dg_bets   — JSON array of all placed bets
+//   dg_limits — today's running totals + the date they belong to
+
 const BETS_KEY = "dg_bets";
 const LIMITS_KEY = "dg_limits";
 
