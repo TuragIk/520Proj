@@ -1,6 +1,6 @@
 import { theme } from "../theme";
 
-export default function Header() {
+export default function Header({ page, onNavigate, betsCount }) {
   return (
     <div
       style={{
@@ -43,7 +43,8 @@ export default function Header() {
           </p>
         </div>
       </div>
-      <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+
+      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
         <div
           style={{
             padding: "4px 12px",
@@ -58,7 +59,53 @@ export default function Header() {
         >
           🏀 NBA
         </div>
+
+        <NavButton active={page === "home"} onClick={() => onNavigate("home")}>
+          Markets
+        </NavButton>
+
+        <NavButton active={page === "bets"} onClick={() => onNavigate("bets")}>
+          My Bets
+          {betsCount > 0 && (
+            <span
+              style={{
+                marginLeft: 6,
+                background: theme.colors.accent,
+                color: "#000",
+                borderRadius: 10,
+                padding: "1px 6px",
+                fontSize: 10,
+                fontWeight: 700,
+              }}
+            >
+              {betsCount}
+            </span>
+          )}
+        </NavButton>
       </div>
     </div>
+  );
+}
+
+function NavButton({ active, onClick, children }) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        background: active ? `${theme.colors.accent}18` : "transparent",
+        border: `1px solid ${active ? theme.colors.accent + "50" : theme.colors.border}`,
+        borderRadius: 6,
+        padding: "5px 12px",
+        color: active ? theme.colors.accent : theme.colors.textMuted,
+        fontSize: 12,
+        fontWeight: 600,
+        cursor: "pointer",
+        fontFamily: theme.fonts.body,
+        display: "flex",
+        alignItems: "center",
+      }}
+    >
+      {children}
+    </button>
   );
 }
