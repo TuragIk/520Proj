@@ -1,93 +1,30 @@
 import { theme } from "../theme";
-import { pct, fmt, fmtVol } from "../utils/formatters";
+import { pct, fmtVol } from "../utils/formatters";
 import PlatformBadge from "./PlatformBadge";
 
-export default function MarketRow({ market }) {
-  const bestYes = market.yes_bid ?? market.yes_price;
-  const bestNo = market.no_bid ?? market.no_price;
+// platform: "kalshi" | "polymarket"
+// away/home: { abbr, odds: { kalshi, polymarket } }
+// volume: { kalshi, polymarket } — may be null for live data
+export default function MarketRow({ platform, away, home, volume }) {
+  const awayOdds = away.odds[platform];
+  const homeOdds = home.odds[platform];
+  const vol = volume?.[platform];
+
+  if (awayOdds == null && homeOdds == null) return null;
 
   return (
     <div
       style={{
         display: "grid",
-        gridTemplateColumns: "120px 1fr 100px",
+        gridTemplateColumns: "130px 1fr 1fr 90px",
         alignItems: "center",
         gap: 12,
-        padding: "12px 0",
+        padding: "11px 0",
         borderBottom: `1px solid ${theme.colors.border}`,
       }}
     >
-      <PlatformBadge platform={market.platform} />
-      <div style={{ display: "flex", gap: 24 }}>
-        <div>
-          <div
-            style={{
-              color: theme.colors.textDim,
-              fontSize: 10,
-              textTransform: "uppercase",
-              letterSpacing: "0.08em",
-              marginBottom: 2,
-            }}
-          >
-            Yes
-          </div>
-          <div
-            style={{
-              color: theme.colors.green,
-              fontSize: 18,
-              fontWeight: 700,
-              fontFamily: theme.fonts.mono,
-            }}
-          >
-            {pct(bestYes)}
-          </div>
-          {market.yes_bid != null && (
-            <div
-              style={{
-                color: theme.colors.textDim,
-                fontSize: 10,
-                fontFamily: theme.fonts.mono,
-              }}
-            >
-              {fmt(market.yes_bid)} / {fmt(market.yes_ask)}
-            </div>
-          )}
-        </div>
-        <div>
-          <div
-            style={{
-              color: theme.colors.textDim,
-              fontSize: 10,
-              textTransform: "uppercase",
-              letterSpacing: "0.08em",
-              marginBottom: 2,
-            }}
-          >
-            No
-          </div>
-          <div
-            style={{
-              color: theme.colors.red,
-              fontSize: 18,
-              fontWeight: 700,
-              fontFamily: theme.fonts.mono,
-            }}
-          >
-            {pct(bestNo)}
-          </div>
-          {market.no_bid != null && (
-            <div
-              style={{
-                color: theme.colors.textDim,
-                fontSize: 10,
-                fontFamily: theme.fonts.mono,
-              }}
-            >
-              {fmt(market.no_bid)} / {fmt(market.no_ask)}
-            </div>
-          )}
-        </div>
-      </div>
+      <PlatformBadge platform={platform} />
+
       <div>
         <div
           style={{
@@ -95,28 +32,77 @@ export default function MarketRow({ market }) {
             fontSize: 10,
             textTransform: "uppercase",
             letterSpacing: "0.08em",
-            marginBottom: 2,
+            marginBottom: 3,
+          }}
+        >
+          {away.abbr} (away)
+        </div>
+        <div
+          style={{
+            color:
+              awayOdds == null
+                ? theme.colors.textDim
+                : awayOdds >= 0.5
+                ? theme.colors.green
+                : theme.colors.red,
+            fontSize: 20,
+            fontWeight: 700,
+            fontFamily: theme.fonts.mono,
+          }}
+        >
+          {awayOdds != null ? pct(awayOdds) : "—"}
+        </div>
+      </div>
+
+      <div>
+        <div
+          style={{
+            color: theme.colors.textDim,
+            fontSize: 10,
+            textTransform: "uppercase",
+            letterSpacing: "0.08em",
+            marginBottom: 3,
+          }}
+        >
+          {home.abbr} (home)
+        </div>
+        <div
+          style={{
+            color:
+              homeOdds == null
+                ? theme.colors.textDim
+                : homeOdds >= 0.5
+                ? theme.colors.green
+                : theme.colors.red,
+            fontSize: 20,
+            fontWeight: 700,
+            fontFamily: theme.fonts.mono,
+          }}
+        >
+          {homeOdds != null ? pct(homeOdds) : "—"}
+        </div>
+      </div>
+
+      <div>
+        <div
+          style={{
+            color: theme.colors.textDim,
+            fontSize: 10,
+            textTransform: "uppercase",
+            letterSpacing: "0.08em",
+            marginBottom: 3,
           }}
         >
           Volume
         </div>
         <div
           style={{
-            color: theme.colors.text,
-            fontSize: 14,
+            color: vol != null ? theme.colors.text : theme.colors.textDim,
+            fontSize: 13,
             fontFamily: theme.fonts.mono,
           }}
         >
-          {fmtVol(market.volume)}
-        </div>
-        <div
-          style={{
-            color: theme.colors.textDim,
-            fontSize: 10,
-            fontFamily: theme.fonts.mono,
-          }}
-        >
-          {fmtVol(market.volume_24h)} 24h
+          {vol != null ? fmtVol(vol) : "—"}
         </div>
       </div>
     </div>

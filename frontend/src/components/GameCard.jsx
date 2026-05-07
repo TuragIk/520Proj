@@ -3,6 +3,9 @@ import { fmtDate, fmtTime, fmtVol } from "../utils/formatters";
 import MarketRow from "./MarketRow";
 
 export default function GameCard({ game }) {
+  const totalVol =
+    (game.volume?.kalshi ?? 0) + (game.volume?.polymarket ?? 0);
+
   return (
     <div
       style={{
@@ -13,12 +16,13 @@ export default function GameCard({ game }) {
         marginBottom: 14,
       }}
     >
+      {/* Header */}
       <div
         style={{
           display: "flex",
           justifyContent: "space-between",
           alignItems: "flex-start",
-          marginBottom: 14,
+          marginBottom: 16,
         }}
       >
         <div>
@@ -31,17 +35,18 @@ export default function GameCard({ game }) {
               fontFamily: theme.fonts.body,
             }}
           >
-            <span style={{ color: game.team_a.color }}>{game.team_a.abbr}</span>
+            <span style={{ color: game.away.color }}>{game.away.abbr}</span>
             <span
               style={{
                 color: theme.colors.textDim,
                 margin: "0 8px",
                 fontWeight: 400,
+                fontSize: 14,
               }}
             >
-              vs
+              @
             </span>
-            <span style={{ color: game.team_b.color }}>{game.team_b.abbr}</span>
+            <span style={{ color: game.home.color }}>{game.home.abbr}</span>
           </h3>
           <p
             style={{
@@ -51,65 +56,90 @@ export default function GameCard({ game }) {
               fontFamily: theme.fonts.body,
             }}
           >
-            {fmtDate(game.date)} · {fmtTime(game.date)} · Total Volume:{" "}
-            <span style={{ color: theme.colors.accent, fontFamily: theme.fonts.mono }}>
-              {fmtVol(game.markets.reduce((sum, m) => sum + m.volume, 0))}
-            </span>
+            {game.away.name} at {game.home.name}
           </p>
         </div>
-        {game.arbitrage.exists && (
+
+        <div style={{ textAlign: "right" }}>
           <div
             style={{
-              background: theme.colors.arbitrageBg,
-              border: `1px solid ${theme.colors.arbitrageBorder}`,
-              borderRadius: 8,
-              padding: "5px 10px",
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-            }}
-          >
-            <span style={{ fontSize: 13 }}>✦</span>
-            <span
-              style={{
-                color: theme.colors.arbitrage,
-                fontSize: 11,
-                fontWeight: 600,
-              }}
-            >
-              ARBITRAGE
-            </span>
-          </div>
-        )}
-      </div>
-
-      {game.markets.map((m, i) => (
-        <MarketRow key={i} market={m} />
-      ))}
-
-      {game.arbitrage.exists && (
-        <div
-          style={{
-            marginTop: 12,
-            padding: "10px 14px",
-            borderRadius: 8,
-            background: theme.colors.arbitrageBg,
-            border: `1px solid ${theme.colors.arbitrageBorder}`,
-          }}
-        >
-          <p
-            style={{
-              margin: 0,
-              color: theme.colors.arbitrage,
+              color: theme.colors.textMuted,
               fontSize: 12,
-              lineHeight: 1.5,
               fontFamily: theme.fonts.body,
             }}
           >
-            {game.arbitrage.description}
-          </p>
+            {fmtDate(game.game_time)} · {fmtTime(game.game_time)}
+          </div>
+          {totalVol > 0 && (
+            <div
+              style={{
+                color: theme.colors.accent,
+                fontSize: 12,
+                fontFamily: theme.fonts.mono,
+                marginTop: 2,
+              }}
+            >
+              {fmtVol(totalVol)} total volume
+            </div>
+          )}
         </div>
-      )}
+      </div>
+
+      {/* Column headers */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "130px 1fr 1fr 90px",
+          gap: 12,
+          padding: "0 0 8px",
+          borderBottom: `1px solid ${theme.colors.border}`,
+        }}
+      >
+        <div />
+        <div
+          style={{
+            color: theme.colors.textDim,
+            fontSize: 10,
+            textTransform: "uppercase",
+            letterSpacing: "0.08em",
+          }}
+        >
+          Away
+        </div>
+        <div
+          style={{
+            color: theme.colors.textDim,
+            fontSize: 10,
+            textTransform: "uppercase",
+            letterSpacing: "0.08em",
+          }}
+        >
+          Home
+        </div>
+        <div
+          style={{
+            color: theme.colors.textDim,
+            fontSize: 10,
+            textTransform: "uppercase",
+            letterSpacing: "0.08em",
+          }}
+        >
+          Vol
+        </div>
+      </div>
+
+      <MarketRow
+        platform="kalshi"
+        away={game.away}
+        home={game.home}
+        volume={game.volume}
+      />
+      <MarketRow
+        platform="polymarket"
+        away={game.away}
+        home={game.home}
+        volume={game.volume}
+      />
     </div>
   );
 }
