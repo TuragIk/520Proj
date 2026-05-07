@@ -1,3 +1,6 @@
+// Small colored pill badge identifying a prediction market platform.
+// Used in GameCard, MarketRow, and BetModal/MyBetsPage bet history rows.
+
 import { theme } from "../theme";
 
 export default function PlatformBadge({ platform }) {

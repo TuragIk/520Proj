@@ -1,3 +1,7 @@
+// Primary brand colors for all 30 NBA teams, keyed by standard 3-letter abbreviation.
+// Used to enrich live backend data (which carries no color info) with display colors.
+// Falls back to a neutral slate if an abbreviation isn't found.
+
 export const TEAM_COLORS = {
   ATL: "#E03A3E", BOS: "#007A33", BRK: "#000000", CHA: "#1D1160",
   CHI: "#CE1141", CLE: "#860038", DAL: "#00538C", DEN: "#0E2240",

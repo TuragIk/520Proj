@@ -1,3 +1,7 @@
+// One row inside a GameCard showing odds and volume for a single platform.
+// Odds are colored green (≥50%) or red (<50%) to highlight the favored team.
+// Returns null if both sides have no data for this platform, so the row is omitted.
+
 import { theme } from "../theme";
 import { pct, fmtVol } from "../utils/formatters";
 import PlatformBadge from "./PlatformBadge";
