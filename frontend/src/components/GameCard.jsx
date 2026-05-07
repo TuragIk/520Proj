@@ -2,19 +2,24 @@ import { theme } from "../theme";
 import { fmtDate, fmtTime, fmtVol } from "../utils/formatters";
 import MarketRow from "./MarketRow";
 
-export default function GameCard({ game }) {
+export default function GameCard({ game, onSelect }) {
   const totalVol =
     (game.volume?.kalshi ?? 0) + (game.volume?.polymarket ?? 0);
 
   return (
     <div
+      onClick={() => onSelect(game)}
       style={{
         background: theme.colors.surface,
         border: `1px solid ${theme.colors.border}`,
         borderRadius: 14,
         padding: 20,
         marginBottom: 14,
+        cursor: "pointer",
+        transition: "border-color 0.15s",
       }}
+      onMouseEnter={(e) => (e.currentTarget.style.borderColor = theme.colors.borderLight)}
+      onMouseLeave={(e) => (e.currentTarget.style.borderColor = theme.colors.border)}
     >
       {/* Header */}
       <div
