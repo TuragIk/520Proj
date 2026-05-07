@@ -3,6 +3,7 @@ import Header from "./components/Header";
 import GameCard from "./components/GameCard";
 import BetModal from "./components/BetModal";
 import MyBetsPage from "./pages/MyBetsPage";
+import LimitBanner, { isAtLimit } from "./components/LimitBanner";
 import { getAllMarkets } from "./api/markets";
 import { getBets, getLimits } from "./api/bets";
 import { theme } from "./theme";
@@ -57,6 +58,9 @@ function App() {
         <MyBetsPage bets={bets} limits={limits} />
       ) : (
       <div style={{ maxWidth: 960, margin: "0 auto", padding: "24px 20px" }}>
+        {/* Limit warning */}
+        {isAtLimit(limits) && <LimitBanner limits={limits} />}
+
         {/* Source badge */}
         {dataSource && (
           <div
@@ -171,6 +175,7 @@ function App() {
       {selectedGame && (
         <BetModal
           game={selectedGame}
+          limits={limits}
           onClose={() => setSelectedGame(null)}
           onBetLogged={(updatedLimits) => { setLimits(updatedLimits); setBets(getBets()); }}
         />

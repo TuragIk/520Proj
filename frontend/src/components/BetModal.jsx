@@ -3,13 +3,14 @@ import { theme } from "../theme";
 import { fmtDate, fmtTime, pct } from "../utils/formatters";
 import PlatformBadge from "./PlatformBadge";
 import { addBet, getLimits } from "../api/bets";
+import { isAtLimit } from "./LimitBanner";
 
 function platformUrl(platform) {
   if (platform === "kalshi") return "https://kalshi.com/markets/kxnbagame";
   return "https://polymarket.com/sports/basketball";
 }
 
-export default function BetModal({ game, onClose, onBetLogged }) {
+export default function BetModal({ game, limits, onClose, onBetLogged }) {
   const [platform, setPlatform] = useState("kalshi");
   const [team, setTeam] = useState(game.home.abbr);
   const [amount, setAmount] = useState("");
@@ -18,6 +19,7 @@ export default function BetModal({ game, onClose, onBetLogged }) {
 
   const selectedTeam = team === game.home.abbr ? game.home : game.away;
   const priceAtEntry = selectedTeam.odds[platform];
+  const locked = isAtLimit(limits);
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -40,8 +42,8 @@ export default function BetModal({ game, onClose, onBetLogged }) {
     if (!result.ok) {
       setError(
         result.reason === "daily_bet_limit"
-          ? "Daily bet limit reached (5 bets/day)."
-          : "Daily amount limit reached ($50/day)."
+          ? `Daily bet limit reached (${limits.max_bets_per_day} bets/day).`
+          : `Daily amount limit reached ($${limits.max_daily_amount.toFixed(0)}/day).`
       );
       return;
     }
@@ -127,12 +129,34 @@ export default function BetModal({ game, onClose, onBetLogged }) {
           ))}
         </div>
 
-        {/* Log a bet form */}
+        {/* Log a bet / lockout */}
         <p style={{ margin: "0 0 12px", fontSize: 11, textTransform: "uppercase", letterSpacing: "0.08em", color: theme.colors.textDim, fontFamily: theme.fonts.body }}>
           Log a Bet
         </p>
 
-        {success ? (
+        {locked ? (
+          <div
+            style={{
+              background: `${theme.colors.warning}10`,
+              border: `1px solid ${theme.colors.warning}35`,
+              borderRadius: 10,
+              padding: "16px 18px",
+            }}
+          >
+            <div style={{ fontSize: 13, fontWeight: 700, color: theme.colors.warning, fontFamily: theme.fonts.body, marginBottom: 6 }}>
+              ⚠️ Daily limit reached — logging paused until tomorrow
+            </div>
+            <div style={{ fontSize: 12, color: theme.colors.textDim, fontFamily: theme.fonts.body, marginBottom: 14 }}>
+              You can still view markets and open them directly on Kalshi or Polymarket above.
+              If gambling is feeling out of control, free help is available:
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              <HelpLine label="📞 National Helpline" detail="1-800-522-4700 (call or text, 24/7)" />
+              <HelpLine label="💬 Crisis Text Line" detail="Text HOME to 741741" />
+              <HelpLine label="🏫 Five College Counseling" detail="Contact your college counseling center" />
+            </div>
+          </div>
+        ) : success ? (
           <div style={{ padding: "14px 16px", borderRadius: 10, background: `${theme.colors.green}15`, border: `1px solid ${theme.colors.green}30`, color: theme.colors.green, fontSize: 13, fontFamily: theme.fonts.body }}>
             Bet logged successfully.
           </div>
@@ -236,6 +260,27 @@ export default function BetModal({ game, onClose, onBetLogged }) {
           </form>
         )}
       </div>
+    </div>
+  );
+}
+
+function HelpLine({ label, detail }) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        padding: "7px 10px",
+        borderRadius: 6,
+        background: theme.colors.bg,
+        border: `1px solid ${theme.colors.border}`,
+        fontSize: 12,
+        fontFamily: theme.fonts.body,
+      }}
+    >
+      <span style={{ fontWeight: 600, color: theme.colors.text }}>{label}</span>
+      <span style={{ color: theme.colors.textDim }}>{detail}</span>
     </div>
   );
 }
