@@ -2,8 +2,9 @@ import { useState, useEffect } from "react";
 import Header from "./components/Header";
 import GameCard from "./components/GameCard";
 import BetModal from "./components/BetModal";
+import MyBetsPage from "./pages/MyBetsPage";
 import { getAllMarkets } from "./api/markets";
-import { getLimits } from "./api/bets";
+import { getBets, getLimits } from "./api/bets";
 import { theme } from "./theme";
 
 function App() {
@@ -13,6 +14,8 @@ function App() {
   const [search, setSearch] = useState("");
   const [selectedGame, setSelectedGame] = useState(null);
   const [limits, setLimits] = useState(() => getLimits());
+  const [page, setPage] = useState("home");
+  const [bets, setBets] = useState(() => getBets());
 
   useEffect(() => {
     getAllMarkets().then(({ games: g, source }) => {
@@ -49,7 +52,10 @@ function App() {
         fontFamily: theme.fonts.body,
       }}
     >
-      <Header />
+      <Header page={page} onNavigate={setPage} betsCount={bets.length} />
+      {page === "bets" ? (
+        <MyBetsPage bets={bets} limits={limits} />
+      ) : (
       <div style={{ maxWidth: 960, margin: "0 auto", padding: "24px 20px" }}>
         {/* Source badge */}
         {dataSource && (
@@ -160,12 +166,13 @@ function App() {
           ))
         )}
       </div>
+      )}
 
       {selectedGame && (
         <BetModal
           game={selectedGame}
           onClose={() => setSelectedGame(null)}
-          onBetLogged={(updatedLimits) => setLimits(updatedLimits)}
+          onBetLogged={(updatedLimits) => { setLimits(updatedLimits); setBets(getBets()); }}
         />
       )}
     </div>
