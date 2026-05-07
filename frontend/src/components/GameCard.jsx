@@ -60,7 +60,32 @@ export default function GameCard({ game }) {
           </p>
         </div>
 
-        <div style={{ textAlign: "right" }}>
+        <div style={{ textAlign: "right", display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6 }}>
+          {game.arbitrage?.exists && (
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 5,
+                padding: "4px 10px",
+                borderRadius: 6,
+                background: theme.colors.arbitrageBg,
+                border: `1px solid ${theme.colors.arbitrageBorder}`,
+              }}
+            >
+              <span style={{ fontSize: 11 }}>✦</span>
+              <span
+                style={{
+                  color: theme.colors.arbitrage,
+                  fontSize: 11,
+                  fontWeight: 600,
+                  letterSpacing: "0.04em",
+                }}
+              >
+                ARBITRAGE
+              </span>
+            </div>
+          )}
           <div
             style={{
               color: theme.colors.textMuted,
@@ -76,7 +101,6 @@ export default function GameCard({ game }) {
                 color: theme.colors.accent,
                 fontSize: 12,
                 fontFamily: theme.fonts.mono,
-                marginTop: 2,
               }}
             >
               {fmtVol(totalVol)} total volume
@@ -140,6 +164,30 @@ export default function GameCard({ game }) {
         home={game.home}
         volume={game.volume}
       />
+
+      {game.arbitrage?.exists && (
+        <div
+          style={{
+            marginTop: 12,
+            padding: "10px 14px",
+            borderRadius: 8,
+            background: theme.colors.arbitrageBg,
+            border: `1px solid ${theme.colors.arbitrageBorder}`,
+          }}
+        >
+          <p
+            style={{
+              margin: 0,
+              color: theme.colors.arbitrage,
+              fontSize: 12,
+              lineHeight: 1.5,
+              fontFamily: theme.fonts.body,
+            }}
+          >
+            {game.arbitrage.description}
+          </p>
+        </div>
+      )}
     </div>
   );
 }

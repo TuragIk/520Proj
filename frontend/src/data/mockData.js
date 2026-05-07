@@ -18,6 +18,7 @@ export const MOCK_GAMES = [
       color: teamColor("CLE"),
       odds: { kalshi: 0.28, polymarket: 0.28 },
     },
+    arbitrage: { exists: false, spread: null, description: null },
     volume: { kalshi: 284000, polymarket: 512000 },
     platform_ids: {
       kalshi: "KXNBAGAME-26MAY06-CLE-BOS",
@@ -39,6 +40,7 @@ export const MOCK_GAMES = [
       color: teamColor("MIN"),
       odds: { kalshi: 0.44, polymarket: 0.43 },
     },
+    arbitrage: { exists: false, spread: null, description: null },
     volume: { kalshi: 891000, polymarket: 1340000 },
     platform_ids: {
       kalshi: "KXNBAGAME-26MAY06-MIN-OKC",
@@ -46,19 +48,26 @@ export const MOCK_GAMES = [
     },
   },
   {
+    // Platforms disagree: Kalshi favors PHI, Polymarket favors NYK → arbitrage
     game_id: "nba-401999003",
     game_time: "2026-05-07T00:00:00Z",
     home: {
       name: "76ers",
       abbr: "PHI",
       color: teamColor("PHI"),
-      odds: { kalshi: 0.52, polymarket: 0.52 },
+      odds: { kalshi: 0.48, polymarket: 0.52 },
     },
     away: {
       name: "Knicks",
       abbr: "NYK",
       color: teamColor("NYK"),
-      odds: { kalshi: 0.48, polymarket: 0.48 },
+      odds: { kalshi: 0.52, polymarket: 0.48 },
+    },
+    arbitrage: {
+      exists: true,
+      spread: 0.04,
+      description:
+        "Buy NYK on Polymarket (48%) + PHI on Kalshi (48%) = 96% cost → $0.04 profit per $1 contract",
     },
     volume: { kalshi: 445000, polymarket: 678000 },
     platform_ids: {
@@ -81,6 +90,7 @@ export const MOCK_GAMES = [
       color: teamColor("LAL"),
       odds: { kalshi: 0.57, polymarket: 0.56 },
     },
+    arbitrage: { exists: false, spread: null, description: null },
     volume: { kalshi: 562000, polymarket: 923000 },
     platform_ids: {
       kalshi: "KXNBAGAME-26MAY07-LAL-GSW",
