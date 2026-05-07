@@ -1,6 +1,6 @@
 import { theme } from "../theme";
 
-export default function Header({ page, onNavigate, betsCount }) {
+export default function Header({ page, onNavigate, betsCount, user, onLoginClick, onLogout }) {
   return (
     <div
       style={{
@@ -82,6 +82,54 @@ export default function Header({ page, onNavigate, betsCount }) {
             </span>
           )}
         </NavButton>
+
+        {user ? (
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginLeft: 4 }}>
+            <span
+              style={{
+                fontSize: 12,
+                color: theme.colors.textDim,
+                fontFamily: theme.fonts.body,
+              }}
+            >
+              {user.username}
+            </span>
+            <button
+              onClick={onLogout}
+              style={{
+                background: "transparent",
+                border: `1px solid ${theme.colors.border}`,
+                borderRadius: 6,
+                padding: "5px 10px",
+                color: theme.colors.textMuted,
+                fontSize: 12,
+                fontWeight: 600,
+                cursor: "pointer",
+                fontFamily: theme.fonts.body,
+              }}
+            >
+              Sign Out
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={onLoginClick}
+            style={{
+              background: `${theme.colors.accent}18`,
+              border: `1px solid ${theme.colors.accent}50`,
+              borderRadius: 6,
+              padding: "5px 12px",
+              color: theme.colors.accent,
+              fontSize: 12,
+              fontWeight: 600,
+              cursor: "pointer",
+              fontFamily: theme.fonts.body,
+              marginLeft: 4,
+            }}
+          >
+            Sign In
+          </button>
+        )}
       </div>
     </div>
   );
