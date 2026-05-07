@@ -15,6 +15,7 @@ ESPN_ABBR_OVERRIDES = {
     "NY": "NYK",
     "GS": "GSW",
     "NO": "NOP",
+    "SA": "SAS",
 }
 
 

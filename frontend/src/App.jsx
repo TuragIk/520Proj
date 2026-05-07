@@ -22,7 +22,10 @@ function App() {
     });
   }, []);
 
-  const sorted = [...games].sort((a, b) => {
+  const now = Date.now();
+  const upcoming = games.filter((g) => new Date(g.game_time).getTime() > now);
+
+  const sorted = [...upcoming].sort((a, b) => {
     const volA = (a.volume?.kalshi ?? 0) + (a.volume?.polymarket ?? 0);
     const volB = (b.volume?.kalshi ?? 0) + (b.volume?.polymarket ?? 0);
     return volB - volA;

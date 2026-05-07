@@ -4,15 +4,9 @@ import { fmtDate, fmtTime, pct } from "../utils/formatters";
 import PlatformBadge from "./PlatformBadge";
 import { addBet, getLimits } from "../api/bets";
 
-function platformUrl(platform, platformId) {
-  if (platform === "kalshi") {
-    return platformId
-      ? `https://kalshi.com/markets/${platformId}`
-      : "https://kalshi.com/markets/kxnbagame";
-  }
-  return platformId
-    ? `https://polymarket.com/event/${platformId}`
-    : "https://polymarket.com/sports/nba";
+function platformUrl(platform) {
+  if (platform === "kalshi") return "https://kalshi.com/markets/kxnbagame";
+  return "https://polymarket.com/sports/basketball";
 }
 
 export default function BetModal({ game, onClose, onBetLogged }) {
@@ -110,7 +104,7 @@ export default function BetModal({ game, onClose, onBetLogged }) {
           {["kalshi", "polymarket"].map((p) => (
             <a
               key={p}
-              href={platformUrl(p, game.platform_ids?.[p])}
+              href={platformUrl(p)}
               target="_blank"
               rel="noopener noreferrer"
               style={{
