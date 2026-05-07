@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import Header from "./components/Header";
 import GameCard from "./components/GameCard";
+import BetModal from "./components/BetModal";
 import { getAllMarkets } from "./api/markets";
+import { getLimits } from "./api/bets";
 import { theme } from "./theme";
 
 function App() {
@@ -9,6 +11,8 @@ function App() {
   const [dataSource, setDataSource] = useState(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [selectedGame, setSelectedGame] = useState(null);
+  const [limits, setLimits] = useState(() => getLimits());
 
   useEffect(() => {
     getAllMarkets().then(({ games: g, source }) => {
@@ -18,7 +22,10 @@ function App() {
     });
   }, []);
 
-  const sorted = [...games].sort((a, b) => {
+  const now = Date.now();
+  const upcoming = games.filter((g) => new Date(g.game_time).getTime() > now);
+
+  const sorted = [...upcoming].sort((a, b) => {
     const volA = (a.volume?.kalshi ?? 0) + (a.volume?.polymarket ?? 0);
     const volB = (b.volume?.kalshi ?? 0) + (b.volume?.polymarket ?? 0);
     return volB - volA;
@@ -148,9 +155,19 @@ function App() {
             </p>
           </div>
         ) : (
-          filtered.map((game) => <GameCard key={game.game_id} game={game} />)
+          filtered.map((game) => (
+            <GameCard key={game.game_id} game={game} onSelect={setSelectedGame} />
+          ))
         )}
       </div>
+
+      {selectedGame && (
+        <BetModal
+          game={selectedGame}
+          onClose={() => setSelectedGame(null)}
+          onBetLogged={(updatedLimits) => setLimits(updatedLimits)}
+        />
+      )}
     </div>
   );
 }
