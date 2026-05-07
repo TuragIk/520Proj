@@ -42,8 +42,8 @@ export default function BetModal({ game, limits, onClose, onBetLogged }) {
     if (!result.ok) {
       setError(
         result.reason === "daily_bet_limit"
-          ? "Daily bet limit reached (5 bets/day)."
-          : "Daily amount limit reached ($50/day)."
+          ? `Daily bet limit reached (${limits.max_bets_per_day} bets/day).`
+          : `Daily amount limit reached ($${limits.max_daily_amount.toFixed(0)}/day).`
       );
       return;
     }

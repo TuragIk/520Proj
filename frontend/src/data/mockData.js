@@ -1,11 +1,15 @@
 import { teamColor } from "./teamData";
 
+function hoursFromNow(h) {
+  return new Date(Date.now() + h * 3600 * 1000).toISOString();
+}
+
 // Matches NormalizedGame shape from GET /markets, extended with display-only fields
 // (volume and platform_ids are not in the real API response — used for mock only)
 export const MOCK_GAMES = [
   {
     game_id: "nba-401999001",
-    game_time: "2026-05-06T23:30:00Z",
+    game_time: hoursFromNow(4),
     home: {
       name: "Celtics",
       abbr: "BOS",
@@ -27,7 +31,7 @@ export const MOCK_GAMES = [
   },
   {
     game_id: "nba-401999002",
-    game_time: "2026-05-07T02:00:00Z",
+    game_time: hoursFromNow(8),
     home: {
       name: "Thunder",
       abbr: "OKC",
@@ -50,7 +54,7 @@ export const MOCK_GAMES = [
   {
     // Platforms disagree: Kalshi favors PHI, Polymarket favors NYK → arbitrage
     game_id: "nba-401999003",
-    game_time: "2026-05-07T00:00:00Z",
+    game_time: hoursFromNow(6),
     home: {
       name: "76ers",
       abbr: "PHI",
@@ -77,7 +81,7 @@ export const MOCK_GAMES = [
   },
   {
     game_id: "nba-401999004",
-    game_time: "2026-05-07T01:30:00Z",
+    game_time: hoursFromNow(10),
     home: {
       name: "Warriors",
       abbr: "GSW",
@@ -110,7 +114,7 @@ export const MOCK_USER_BETS = [
     amount: 10.0,
     price_at_entry: 0.65,
     status: "open",
-    placed_at: "2026-05-05T10:15:00Z",
+    placed_at: hoursFromNow(-36),
   },
   {
     id: "bet-002",
@@ -122,13 +126,6 @@ export const MOCK_USER_BETS = [
     amount: 5.0,
     price_at_entry: 0.42,
     status: "open",
-    placed_at: "2026-05-05T14:30:00Z",
+    placed_at: hoursFromNow(-24),
   },
 ];
-
-export const INITIAL_LIMITS = {
-  max_bets_per_day: 5,
-  bets_today: 2,
-  max_daily_amount: 50.0,
-  amount_today: 15.0,
-};
