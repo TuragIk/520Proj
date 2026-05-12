@@ -36,11 +36,9 @@ def get_current_user(
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found.")
     return user
 
-
 def _today_start() -> datetime:
     today = date.today()
     return datetime(today.year, today.month, today.day, tzinfo=timezone.utc)
-
 
 @router.get("/users/me")
 def get_me(
@@ -67,7 +65,6 @@ def get_me(
         "amount_today": float(amount_today),
     }
 
-
 @router.get("/bets")
 def get_bets(
     current_user: User = Depends(get_current_user),
@@ -87,7 +84,7 @@ def get_bets(
             "event_name": market.title,
             "platform": bet.platform,
             "team": None,
-            "team_name": None,
+            "team_name": market.title,
             "amount": float(bet.amount),
             "price_at_entry": None,
             "status": bet.status,
@@ -95,7 +92,6 @@ def get_bets(
         }
         for bet, market in rows
     ]
-
 
 class PlaceBetRequest(BaseModel):
     game_id: str
@@ -105,7 +101,6 @@ class PlaceBetRequest(BaseModel):
     team_name: str
     amount: float
     price_at_entry: Optional[float] = None
-
 
 @router.post("/bets", status_code=201)
 def place_bet(

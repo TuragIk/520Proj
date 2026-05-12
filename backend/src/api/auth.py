@@ -38,18 +38,14 @@ def create_access_token(user_id: str) -> str:
 def login(body: LoginRequest, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == body.username).first()
     if not user or not pwd_context.verify(body.password, user.password_hash):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid credentials.",
-        )
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials.")
     return TokenResponse(access_token=create_access_token(str(user.id)))
 
 @router.post("/register", response_model=TokenResponse, status_code=201)
 def register(body: RegisterRequest, db: Session = Depends(get_db)):
     if not body.username.strip() or not body.password.strip():
         raise HTTPException(status_code=400, detail="Username and password required.")
-    existing = db.query(User).filter(User.email == body.username).first()
-    if existing:
+    if db.query(User).filter(User.email == body.username).first():
         raise HTTPException(status_code=409, detail="An account with that username already exists.")
     user = User(
         email=body.username,
