@@ -26,7 +26,7 @@ export default function BetModal({ game, limits, user, onClose, onBetLogged, onL
   const priceAtEntry = selectedTeam.odds[platform];
   const locked = isAtLimit(limits);
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     const amt = parseFloat(amount);
     if (!amt || amt <= 0) {
@@ -34,7 +34,7 @@ export default function BetModal({ game, limits, user, onClose, onBetLogged, onL
       return;
     }
 
-    const result = addBet({
+    const result = await addBet({
       game_id: game.game_id,
       event_name: `${game.away.abbr} @ ${game.home.abbr}`,
       platform,
