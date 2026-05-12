@@ -32,9 +32,30 @@ function App() {
   const [user, setUser] = useState(() => getUser());
   const [showLogin, setShowLogin] = useState(false);
 
-  function handleLogin(loggedInUser) {
+  async function handleLogin(loggedInUser) {
     setUser(loggedInUser);
     setShowLogin(false);
+    try {
+      const { getToken } = await import("./api/auth");
+      const token = getToken();
+      if (token && token !== "mock-token") {
+        const res = await fetch("http://localhost:8000/users/me", {
+          headers: { Authorization: `Bearer ${token}` },
+          signal: AbortSignal.timeout(3000),
+        });
+        if (res.ok) {
+          const me = await res.json();
+          setLimits({
+            max_bets_per_day: me.max_bets_per_day,
+            max_daily_amount: me.max_daily_spend,
+            bets_today: me.bets_today,
+            amount_today: me.amount_today,
+          });
+        }
+      }
+    } catch {
+      // backend offline — keep localStorage limits
+    }
   }
 
   function handleLogout() {

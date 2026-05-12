@@ -48,13 +48,22 @@ app.include_router(bets_router)
 async def root():
     return {"message": "Welcome to the Dynamite Gambling API"}
 
-
 @app.get("/health")
 async def health_check():
     from .cache.redis_client import get_redis
+    from .db.connection import engine
+    from sqlalchemy import text
+
     r = get_redis()
-    return {
-        "status": "healthy",
-        "cache": "connected" if r else "disconnected",
-        "db": "disconnected",
-    }
+    cache_status = "connected" if r else "disconnected"
+
+    db_status = "disconnected"
+    if engine:
+        try:
+            with engine.connect() as conn:
+                conn.execute(text("SELECT 1"))
+            db_status = "connected"
+        except Exception:
+            db_status = "error"
+
+    return {"status": "healthy", "cache": cache_status, "db": db_status}

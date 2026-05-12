@@ -19,7 +19,6 @@ ALGORITHM = "HS256"
 
 _bearer = HTTPBearer()
 
-
 def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(_bearer),
     db: Session = Depends(get_db),
@@ -69,6 +68,35 @@ def get_me(
     }
 
 
+@router.get("/bets")
+def get_bets(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    rows = (
+        db.query(PlacedBet, Market)
+        .join(Market, PlacedBet.market_id == Market.id)
+        .filter(PlacedBet.user_id == current_user.id)
+        .order_by(PlacedBet.placed_at.desc())
+        .all()
+    )
+    return [
+        {
+            "id": str(bet.id),
+            "game_id": market.external_id,
+            "event_name": market.title,
+            "platform": bet.platform,
+            "team": None,
+            "team_name": None,
+            "amount": float(bet.amount),
+            "price_at_entry": None,
+            "status": bet.status,
+            "placed_at": bet.placed_at.isoformat() if bet.placed_at else None,
+        }
+        for bet, market in rows
+    ]
+
+
 class PlaceBetRequest(BaseModel):
     game_id: str
     event_name: str
@@ -104,8 +132,6 @@ def place_bet(
     if float(amount_today) + body.amount > float(current_user.max_daily_spend):
         raise HTTPException(status_code=400, detail="daily_amount_limit")
 
-    # Look up or create a Market row (Kevin's scheduler will upsert the real one later;
-    # this ensures the FK constraint is satisfied immediately when a user logs a bet)
     market = db.query(Market).filter(
         Market.external_id == body.game_id,
         Market.platform == body.platform,
