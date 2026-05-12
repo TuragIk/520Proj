@@ -19,7 +19,11 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 class LoginRequest(BaseModel):
-    username: str  # frontend sends "username"; we look it up as email in the DB
+    username: str
+    password: str
+
+class RegisterRequest(BaseModel):
+    username: str
     password: str
 
 class TokenResponse(BaseModel):
@@ -38,5 +42,20 @@ def login(body: LoginRequest, db: Session = Depends(get_db)):
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid credentials.",
         )
-    token = create_access_token(str(user.id))
-    return TokenResponse(access_token=token)
+    return TokenResponse(access_token=create_access_token(str(user.id)))
+
+@router.post("/register", response_model=TokenResponse, status_code=201)
+def register(body: RegisterRequest, db: Session = Depends(get_db)):
+    if not body.username.strip() or not body.password.strip():
+        raise HTTPException(status_code=400, detail="Username and password required.")
+    existing = db.query(User).filter(User.email == body.username).first()
+    if existing:
+        raise HTTPException(status_code=409, detail="An account with that username already exists.")
+    user = User(
+        email=body.username,
+        password_hash=pwd_context.hash(body.password),
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return TokenResponse(access_token=create_access_token(str(user.id)))
