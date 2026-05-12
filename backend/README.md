@@ -7,29 +7,30 @@ FastAPI backend for Dynamite Gambling. Fetches NBA game schedules from ESPN, que
 - **FastAPI** — API framework
 - **PostgreSQL** — persistent storage (bets, price history, users)
 - **Redis** — short-TTL odds cache
+- **APScheduler** — background polling every 5 minutes
 - **httpx** — async-capable HTTP client for external API calls
 
 ## Prerequisites
 
 - Python 3.12+
-- PostgreSQL running locally or via a connection URL
-- Redis running locally (default port 6379)
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) — used to run PostgreSQL and Redis locally
 
 ## Setup
+**Step 1 — Start the database and cache** (from the project root, not the backend/ directory):
 
 ```bash
-# From the backend/ directory
+docker-compose up -d
 
+# From the backend/ directory
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
-
 Create a `.env` file in `backend/`:
-
 ```
-DATABASE_URL=postgresql://user:password@localhost:5432/dynamite
+cp .env.example .env
 ```
+The values in .env.example are already configured to match the docker-compose credentials — no edits needed for local development.
 
 ## Running
 
@@ -39,6 +40,10 @@ uvicorn src.main:app --reload
 ```
 
 The API will be available at `http://localhost:8000`. Interactive docs at `http://localhost:8000/docs`.
+
+On first startup, the server automatically creates all database tables and seeds a default login: admin@dynamite.com, password123
+
+Additional accounts can be created via POST /auth/register
 
 ## API Endpoints
 
@@ -50,6 +55,13 @@ The API will be available at `http://localhost:8000`. Interactive docs at `http:
 | `GET` | `/markets/kalshi` | Raw Kalshi markets for each upcoming game |
 | `GET` | `/markets/polymarket` | Raw Polymarket markets for each upcoming game |
 | `GET` | `/markets` | **Primary endpoint.** Normalized odds from both platforms side by side |
+| `POST`| `/auth/register`| Creates a new user account |
+| `POST`| `/auth/login`| Returns a JWT bearer token |
+| `GET`| `/users/me`| Current user profile and today's usage stats |
+| `GET`| `/bets`| All placed bets for the authenticated user |
+| `POST`| `/bets`| Log a new placed bet(for authenticated user) |
+
+
 
 ### `GET /markets` response shape
 
@@ -75,6 +87,11 @@ The API will be available at `http://localhost:8000`. Interactive docs at `http:
           "kalshi": 0.675,
           "polymarket": 0.675
         }
+      },
+      "arbitrage": {
+        "exists": false,
+        "spread": null,
+        "description": null
       }
     }
   ]
@@ -91,21 +108,26 @@ backend/
 └── src/
     ├── main.py               # FastAPI app and router registration
     ├── api/
-    │   ├── schedule.py       # GET /schedule/nba
-    │   ├── kalshi.py         # GET /markets/kalshi
-    │   ├── polymarket.py     # GET /markets/polymarket
-    │   └── markets_unified.py # GET /markets (normalized)
+    │   ├── auth.py             # POST /auth/login, POST /auth/register
+    │   ├── bets.py             # GET /bets, POST /bets, GET /users/me (JWT protected)
+    │   ├── markets_unified.py  # GET /markets (Redis cache → live fetch fallback)
+    │   ├── schedule.py         # GET /schedule/nba
+    │   ├── kalshi.py           # GET /markets/kalshi
+    │   └── polymarket.py       # GET /markets/polymarket
     ├── services/
-    │   ├── espn.py           # ESPN scoreboard fetcher
-    │   ├── kalshi.py         # Kalshi API client
-    │   ├── polymarket.py     # Polymarket Gamma API client
-    │   └── normalize.py      # Merges Kalshi + Polymarket into common schema
+    │   ├── poller.py           # poll_and_cache(): full fetch → Redis + DB write-through
+    │   ├── espn.py             # ESPN scoreboard fetcher
+    │   ├── kalshi.py           # Kalshi API client
+    │   ├── polymarket.py       # Polymarket Gamma API client
+    │   └── normalize.py        # Merges Kalshi + Polymarket into NormalizedGame schema
+    ├── cache/
+    │   └── redis_client.py     # Redis connection with fallback when unavailable
     ├── data/
-    │   └── nba_teams.py      # ESPN abbreviation → team metadata hashmap
+    │   └── nba_teams.py        # ESPN abbreviation → Kalshi/Polymarket keyword map (all 30 teams)
     └── db/
-        ├── models.py         # SQLAlchemy ORM models
-        ├── connection.py     # DB session and engine setup
-        └── seed.py           # Dev seed data
+        ├── models.py           # SQLAlchemy ORM models (User, Market, PlacedBet, PriceHistory, UserWatchlist)
+        ├── connection.py       # DB engine and get_db() dependency; safe when DATABASE_URL is unset
+        └── seed.py             # Standalone dev seed script (auto-seeding is handled by main.py)
 ```
 
 ## TODO 

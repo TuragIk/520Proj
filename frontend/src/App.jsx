@@ -36,8 +36,7 @@ function App() {
     setUser(loggedInUser);
     setShowLogin(false);
     try {
-      const { getToken } = await import("./api/auth");
-      const token = getToken();
+      const token = localStorage.getItem("dg_token");
       if (token && token !== "mock-token") {
         const res = await fetch("http://localhost:8000/users/me", {
           headers: { Authorization: `Bearer ${token}` },

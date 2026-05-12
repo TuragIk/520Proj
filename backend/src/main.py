@@ -1,9 +1,12 @@
 import logging
 from contextlib import asynccontextmanager
+from datetime import datetime, timezone
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from passlib.context import CryptContext
+from sqlalchemy import text
 
 from .api.schedule import router as schedule_router
 from .api.kalshi import router as kalshi_router
@@ -15,8 +18,41 @@ from .services.poller import poll_and_cache
 
 logger = logging.getLogger(__name__)
 
+_pwd = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+DEFAULT_EMAIL = "admin@dynamite.com"
+DEFAULT_PASSWORD = "password123"
+
+def _init_db():
+    from .db.connection import engine, SessionLocal
+    from .db.models import Base, User
+
+    if engine is None:
+        logger.warning("DATABASE_URL not set — skipping DB init")
+        return
+
+    Base.metadata.create_all(bind=engine)
+    logger.info("Database tables ready")
+
+    db = SessionLocal()
+    try:
+        if not db.query(User).first():
+            db.add(User(
+                email=DEFAULT_EMAIL,
+                password_hash=_pwd.hash(DEFAULT_PASSWORD),
+            ))
+            db.commit()
+            logger.info(f"Default user created — login: {DEFAULT_EMAIL} / {DEFAULT_PASSWORD}")
+    except Exception as e:
+        db.rollback()
+        logger.error(f"DB seeding failed: {e}")
+    finally:
+        db.close()
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    _init_db()
+
     scheduler = BackgroundScheduler()
     scheduler.add_job(poll_and_cache, "interval", minutes=5, id="market_poll")
     scheduler.start()
@@ -52,7 +88,6 @@ async def root():
 async def health_check():
     from .cache.redis_client import get_redis
     from .db.connection import engine
-    from sqlalchemy import text
 
     r = get_redis()
     cache_status = "connected" if r else "disconnected"

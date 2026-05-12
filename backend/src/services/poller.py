@@ -35,7 +35,6 @@ def poll_and_cache():
             pm_market = None
         results.append(normalize_game(game, kalshi_markets, pm_market))
 
-    # Write to Redis cache
     r = get_redis()
     if r:
         r.setex(CACHE_KEY, CACHE_TTL, json.dumps({"games": results, "count": len(results)}))
@@ -43,48 +42,43 @@ def poll_and_cache():
     else:
         logger.warning("Redis unavailable — poll results not cached")
 
-    # Write to DB (upsert Market rows + insert PriceHistory rows)
     if SessionLocal is None:
-        return  # DB not configured, skip
+        return
 
     db = SessionLocal()
     try:
         now = datetime.now(timezone.utc)
         for normalized in results:
-            for side, platform_key in [
-                (normalized["home"], "kalshi"),
-                (normalized["away"], "kalshi"),
-                (normalized["home"], "polymarket"),
-                (normalized["away"], "polymarket"),
-            ]:
-                odds_value = side["odds"].get(platform_key)
-                if odds_value is None:
-                    continue
+            for side in [normalized["home"], normalized["away"]]:
+                for platform_key in ["kalshi", "polymarket"]:
+                    odds_value = side["odds"].get(platform_key)
+                    if odds_value is None:
+                        continue
 
-                game_id = normalized["game_id"]
-                title = f"{normalized['away']['abbr']} @ {normalized['home']['abbr']}"
+                    title = f"{normalized['away']['abbr']} @ {normalized['home']['abbr']}"
+                    game_id = normalized["game_id"]
 
-                market = db.query(Market).filter(
-                    Market.external_id == game_id,
-                    Market.platform == platform_key,
-                ).first()
-                if not market:
-                    market = Market(
-                        external_id=game_id,
+                    market = db.query(Market).filter(
+                        Market.external_id == game_id,
+                        Market.platform == platform_key,
+                    ).first()
+                    if not market:
+                        market = Market(
+                            external_id=game_id,
+                            platform=platform_key,
+                            title=title,
+                            category="NBA",
+                        )
+                        db.add(market)
+                        db.flush()
+                    else:
+                        market.last_updated = now
+
+                    db.add(PriceHistory(
+                        market_id=market.id,
                         platform=platform_key,
-                        title=title,
-                        category="NBA",
-                    )
-                    db.add(market)
-                    db.flush()
-                else:
-                    market.last_updated = now
-
-                db.add(PriceHistory(
-                    market_id=market.id,
-                    platform=platform_key,
-                    odds=odds_value,
-                ))
+                        odds=odds_value,
+                    ))
 
         db.commit()
         logger.info("DB write-through complete")

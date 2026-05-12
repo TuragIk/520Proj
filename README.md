@@ -4,6 +4,12 @@ A third-party platform that aggregates NBA prediction market data from Kalshi an
 
 ## Getting Started & Build Instructions
 
+**Requirements:** [Docker Desktop](https://www.docker.com/products/docker-desktop/), Python 3.12+, Node.js 18+
+```bash
+# Run this first from the project root — starts PostgreSQL and Redis
+docker-compose up -d
+```
+
 - **Backend:** See [backend/README.md](backend/README.md) for setup and API documentation.
 - **Frontend:** See [frontend/README.md](frontend/README.md) for setup and development instructions.
 

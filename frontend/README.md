@@ -5,6 +5,7 @@ React + Vite frontend for Dynamite Gambling. Displays live NBA odds aggregated f
 ## Prerequisites
 
 - Node.js 18+
+- Backend running at http://localhost:8000 (see backend/README.md)
 
 ## Setup
 
@@ -87,8 +88,9 @@ See [backend/README.md](../backend/README.md) for backend setup.
 ## Authentication
 
 Login hits `POST /auth/localhost:8000/auth/login`. When the backend is offline, **any non-empty username and password will work** — the app stores a mock token and proceeds normally. This allows the full auth flow to be demoed without the server.
+Default account created automatically on first backend startup: admin@dynamite.com, password123
+To create a new account: POST http://localhost:8000/auth/register or use the API docs at http://localhost:8000/docs.
 
-To sign in during a demo: use any credentials, e.g. `admin` / `admin`.
 
 ---
 
