@@ -48,6 +48,7 @@ app.include_router(bets_router)
 async def root():
     return {"message": "Welcome to the Dynamite Gambling API"}
 
+
 @app.get("/health")
 async def health_check():
     from .cache.redis_client import get_redis
