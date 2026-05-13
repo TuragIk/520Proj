@@ -39,6 +39,7 @@ class PriceHistory(Base):
     id          = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     market_id   = Column(UUID(as_uuid=True), ForeignKey("markets.id", ondelete="CASCADE"))
     platform    = Column(String(50), nullable=False)
+    side        = Column(String(10), nullable=False)  # "home" or "away"
     odds        = Column(Numeric(6, 4), nullable=False)
     recorded_at = Column(TIMESTAMP, server_default=func.now())
 

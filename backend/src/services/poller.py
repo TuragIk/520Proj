@@ -49,7 +49,7 @@ def poll_and_cache():
     try:
         now = datetime.now(timezone.utc)
         for normalized in results:
-            for side in [normalized["home"], normalized["away"]]:
+            for side_key, side in [("home", normalized["home"]), ("away", normalized["away"])]:
                 for platform_key in ["kalshi", "polymarket"]:
                     odds_value = side["odds"].get(platform_key)
                     if odds_value is None:
@@ -77,6 +77,7 @@ def poll_and_cache():
                     db.add(PriceHistory(
                         market_id=market.id,
                         platform=platform_key,
+                        side=side_key,
                         odds=odds_value,
                     ))
 

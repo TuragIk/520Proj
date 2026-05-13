@@ -5,7 +5,17 @@ import {
 import { theme } from "../theme";
 import { fetchPriceHistory } from "../api/markets";
 
-export default function PriceHistoryChart({ gameId }) {
+// Four series: each team × each platform, distinguished by color and dash style
+function seriesConfig(home, away) {
+  return [
+    { key: `kalshi_home`,      label: `Kalshi · ${home.abbr}`,      stroke: theme.colors.kalshi,      dash: "0" },
+    { key: `kalshi_away`,      label: `Kalshi · ${away.abbr}`,      stroke: theme.colors.kalshi,      dash: "4 3" },
+    { key: `polymarket_home`,  label: `Polymarket · ${home.abbr}`,  stroke: theme.colors.polymarket,  dash: "0" },
+    { key: `polymarket_away`,  label: `Polymarket · ${away.abbr}`,  stroke: theme.colors.polymarket,  dash: "4 3" },
+  ];
+}
+
+export default function PriceHistoryChart({ gameId, home, away }) {
   const [chartData, setChartData] = useState(null);
 
   useEffect(() => {
@@ -16,8 +26,8 @@ export default function PriceHistoryChart({ gameId }) {
       for (const row of history) {
         const t = row.recorded_at?.slice(11, 16) ?? "?";
         if (!byTime[t]) byTime[t] = { time: t };
-        const cur = byTime[t][row.platform];
-        byTime[t][row.platform] = cur == null ? row.odds : Math.max(cur, row.odds);
+        const key = `${row.platform}_${row.side}`;
+        byTime[t][key] = row.odds;
       }
       setChartData(
         Object.values(byTime).sort((a, b) => a.time.localeCompare(b.time))
@@ -40,8 +50,10 @@ export default function PriceHistoryChart({ gameId }) {
     );
   }
 
+  const series = seriesConfig(home, away);
+
   return (
-    <ResponsiveContainer width="100%" height={150}>
+    <ResponsiveContainer width="100%" height={180}>
       <LineChart data={chartData} margin={{ top: 4, right: 4, left: -12, bottom: 0 }}>
         <XAxis dataKey="time" tick={{ fontSize: 10, fill: theme.colors.textDim }} />
         <YAxis
@@ -51,7 +63,7 @@ export default function PriceHistoryChart({ gameId }) {
           width={36}
         />
         <Tooltip
-          formatter={(v) => `${(v * 100).toFixed(1)}%`}
+          formatter={(v, name) => [`${(v * 100).toFixed(1)}%`, name]}
           contentStyle={{
             background: theme.colors.surface,
             border: `1px solid ${theme.colors.border}`,
@@ -59,9 +71,21 @@ export default function PriceHistoryChart({ gameId }) {
             fontSize: 12,
           }}
         />
-        <Legend wrapperStyle={{ fontSize: 11, fontFamily: theme.fonts.body }} />
-        <Line type="monotone" dataKey="kalshi" stroke={theme.colors.kalshi} strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 5 }} />
-        <Line type="monotone" dataKey="polymarket" stroke={theme.colors.polymarket} strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 5 }} />
+        <Legend wrapperStyle={{ fontSize: 10, fontFamily: theme.fonts.body }} />
+        {series.map(({ key, label, stroke, dash }) => (
+          <Line
+            key={key}
+            type="monotone"
+            dataKey={key}
+            name={label}
+            stroke={stroke}
+            strokeWidth={2}
+            strokeDasharray={dash}
+            dot={{ r: 3 }}
+            activeDot={{ r: 5 }}
+            connectNulls
+          />
+        ))}
       </LineChart>
     </ResponsiveContainer>
   );

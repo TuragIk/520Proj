@@ -61,6 +61,7 @@ def get_price_history(game_id: str, db: Session = Depends(get_db)):
         "history": [
             {
                 "platform": h.platform,
+                "side": h.side,
                 "odds": float(h.odds),
                 "recorded_at": h.recorded_at.isoformat() if h.recorded_at else None,
             }
