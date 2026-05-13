@@ -1,29 +1,50 @@
-// Full-screen overlay login form. Calls auth.login() which hits the backend
-// and falls back to a mock (any credentials work) when the server is offline.
-// Fires onLogin(user) on success so App can update its auth state.
-
 import { useState } from "react";
 import { theme } from "../theme";
-import { login } from "../api/auth";
+import { login, register } from "../api/auth";
 
 export default function LoginModal({ onLogin, onClose }) {
+  const [mode, setMode] = useState("login");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  function switchMode(next) {
+    setMode(next);
+    setError(null);
+    setUsername("");
+    setPassword("");
+    setConfirm("");
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
-    setLoading(true);
     setError(null);
-    const result = await login(username, password);
+
+    if (mode === "register" && password !== confirm) {
+      setError("Passwords do not match.");
+      return;
+    }
+    if (mode === "register" && password.length < 6) {
+      setError("Password must be at least 6 characters.");
+      return;
+    }
+
+    setLoading(true);
+    const result = mode === "login"
+      ? await login(username, password)
+      : await register(username, password);
     setLoading(false);
+
     if (!result.ok) {
       setError(result.error);
       return;
     }
     onLogin(result.user);
   }
+
+  const isLogin = mode === "login";
 
   return (
     <div
@@ -51,9 +72,10 @@ export default function LoginModal({ onLogin, onClose }) {
           maxWidth: 380,
         }}
       >
+        {/* Header */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
           <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: theme.colors.text, fontFamily: theme.fonts.body }}>
-            Sign In
+            {isLogin ? "Sign In" : "Create Account"}
           </h2>
           <button
             onClick={onClose}
@@ -66,7 +88,7 @@ export default function LoginModal({ onLogin, onClose }) {
         <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           <input
             type="text"
-            placeholder="Username"
+            placeholder="Email"
             value={username}
             onChange={(e) => { setUsername(e.target.value); setError(null); }}
             autoFocus
@@ -79,6 +101,16 @@ export default function LoginModal({ onLogin, onClose }) {
             onChange={(e) => { setPassword(e.target.value); setError(null); }}
             style={inputStyle}
           />
+
+          {!isLogin && (
+            <input
+              type="password"
+              placeholder="Confirm password"
+              value={confirm}
+              onChange={(e) => { setConfirm(e.target.value); setError(null); }}
+              style={inputStyle}
+            />
+          )}
 
           {error && (
             <p style={{ margin: 0, fontSize: 12, color: theme.colors.red, fontFamily: theme.fonts.body }}>{error}</p>
@@ -100,9 +132,32 @@ export default function LoginModal({ onLogin, onClose }) {
               marginTop: 4,
             }}
           >
-            {loading ? "Signing in…" : "Sign In"}
+            {loading
+              ? (isLogin ? "Signing in…" : "Creating account…")
+              : (isLogin ? "Sign In" : "Create Account")}
           </button>
         </form>
+
+        {/* Toggle */}
+        <div style={{ marginTop: 20, textAlign: "center", fontSize: 12, color: theme.colors.textDim, fontFamily: theme.fonts.body }}>
+          {isLogin ? "Don't have an account?" : "Already have an account?"}
+          {" "}
+          <button
+            onClick={() => switchMode(isLogin ? "register" : "login")}
+            style={{
+              background: "none",
+              border: "none",
+              color: theme.colors.accent,
+              fontSize: 12,
+              fontWeight: 600,
+              cursor: "pointer",
+              fontFamily: theme.fonts.body,
+              padding: 0,
+            }}
+          >
+            {isLogin ? "Sign Up" : "Sign In"}
+          </button>
+        </div>
       </div>
     </div>
   );

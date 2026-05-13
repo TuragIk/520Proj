@@ -16,7 +16,7 @@ import MyBetsPage from "./pages/MyBetsPage";
 import LimitBanner, { isAtLimit } from "./components/LimitBanner";
 import LoginModal from "./components/LoginModal";
 import { getAllMarkets } from "./api/markets";
-import { getBets, getLimits } from "./api/bets";
+import { getBets, getLimits, fetchBets } from "./api/bets";
 import { getUser, logout } from "./api/auth";
 import { checkAlerts } from "./api/watchlist";
 import NotificationToast from "./components/NotificationToast";
@@ -36,34 +36,41 @@ function App() {
   const [notifications, setNotifications] = useState([]);
 
   async function handleLogin(loggedInUser) {
-    setUser(loggedInUser);
-    setShowLogin(false);
-    try {
-      const token = localStorage.getItem("dg_token");
-      if (token && token !== "mock-token") {
-        const res = await fetch("http://localhost:8000/users/me", {
+  setUser(loggedInUser);
+  setShowLogin(false);
+  try {
+    const token = localStorage.getItem("dg_token");
+    if (token && token !== "mock-token") {
+      const [meRes, freshBets] = await Promise.all([
+        fetch("http://localhost:8000/users/me", {
           headers: { Authorization: `Bearer ${token}` },
           signal: AbortSignal.timeout(3000),
+        }),
+        fetchBets(),
+      ]);
+      setBets(freshBets);
+      if (meRes.ok) {
+        const me = await meRes.json();
+        setLimits({
+          max_bets_per_day: me.max_bets_per_day,
+          max_daily_amount: me.max_daily_spend,
+          bets_today: me.bets_today,
+          amount_today: me.amount_today,
         });
-        if (res.ok) {
-          const me = await res.json();
-          setLimits({
-            max_bets_per_day: me.max_bets_per_day,
-            max_daily_amount: me.max_daily_spend,
-            bets_today: me.bets_today,
-            amount_today: me.amount_today,
-          });
-        }
       }
-    } catch {
-      // backend offline — keep localStorage limits
     }
+  } catch {
+    // backend offline — keep localStorage state
   }
+}
 
   function handleLogout() {
-    logout();
-    setUser(null);
-  }
+  logout();
+  setUser(null);
+  setBets([]);
+  localStorage.removeItem("dg_bets");
+}
+
 
   useEffect(() => {
     function fetchMarkets() {
