@@ -5,6 +5,7 @@ import PlatformBadge from "./PlatformBadge";
 import { addBet, getLimits } from "../api/bets";
 import { isAtLimit } from "./LimitBanner";
 import PriceHistoryChart from "./PriceHistoryChart";
+import { isWatched, addWatch, removeWatch } from "../api/watchlist";
 
 function platformUrl(platform) {
   if (platform === "kalshi") return "https://kalshi.com/markets/kxnbagame";
@@ -17,6 +18,8 @@ export default function BetModal({ game, limits, user, onClose, onBetLogged, onL
   const [amount, setAmount] = useState("");
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
+  const [watched, setWatched] = useState(() => isWatched(game.game_id));
+  const [threshold, setThreshold] = useState("10");
 
   const selectedTeam = team === game.home.abbr ? game.home : game.away;
   const priceAtEntry = selectedTeam.odds[platform];
@@ -304,6 +307,67 @@ export default function BetModal({ game, limits, user, onClose, onBetLogged, onL
             </button>
           </form>
         )}
+        {/* Watch section */}
+        <div style={{ marginTop: 24, paddingTop: 20, borderTop: `1px solid ${theme.colors.border}` }}>
+          <p style={{ margin: "0 0 10px", fontSize: 11, textTransform: "uppercase", letterSpacing: "0.08em", color: theme.colors.textDim, fontFamily: theme.fonts.body }}>
+            Price Alert
+          </p>
+          {watched ? (
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 14px", borderRadius: 8, background: `${theme.colors.accent}0d`, border: `1px solid ${theme.colors.accent}30` }}>
+              <span style={{ fontSize: 12, color: theme.colors.accent, fontFamily: theme.fonts.body, fontWeight: 600 }}>
+                Watching · alerts at ≥{threshold}% move
+              </span>
+              <button
+                onClick={() => { removeWatch(game.game_id); setWatched(false); }}
+                style={{ background: "none", border: "none", color: theme.colors.textDim, fontSize: 12, cursor: "pointer", fontFamily: theme.fonts.body, padding: 0 }}
+              >
+                Unwatch
+              </button>
+            </div>
+          ) : (
+            <div style={{ display: "flex", gap: 8 }}>
+              <div style={{ position: "relative", flex: 1 }}>
+                <input
+                  type="number"
+                  min="1"
+                  max="50"
+                  value={threshold}
+                  onChange={(e) => setThreshold(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "9px 28px 9px 12px",
+                    borderRadius: 8,
+                    border: `1px solid ${theme.colors.border}`,
+                    background: theme.colors.bg,
+                    color: theme.colors.text,
+                    fontSize: 13,
+                    fontFamily: theme.fonts.mono,
+                    outline: "none",
+                    boxSizing: "border-box",
+                  }}
+                />
+                <span style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", color: theme.colors.textDim, fontSize: 12 }}>%</span>
+              </div>
+              <button
+                onClick={() => { addWatch(game, threshold); setWatched(true); }}
+                style={{
+                  padding: "9px 16px",
+                  borderRadius: 8,
+                  border: `1px solid ${theme.colors.accent}`,
+                  background: "transparent",
+                  color: theme.colors.accent,
+                  fontSize: 12,
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  fontFamily: theme.fonts.body,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                Watch
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -18,6 +18,8 @@ import LoginModal from "./components/LoginModal";
 import { getAllMarkets } from "./api/markets";
 import { getBets, getLimits } from "./api/bets";
 import { getUser, logout } from "./api/auth";
+import { checkAlerts } from "./api/watchlist";
+import NotificationToast from "./components/NotificationToast";
 import { theme } from "./theme";
 
 function App() {
@@ -31,6 +33,7 @@ function App() {
   const [bets, setBets] = useState(() => getBets());
   const [user, setUser] = useState(() => getUser());
   const [showLogin, setShowLogin] = useState(false);
+  const [notifications, setNotifications] = useState([]);
 
   async function handleLogin(loggedInUser) {
     setUser(loggedInUser);
@@ -63,11 +66,18 @@ function App() {
   }
 
   useEffect(() => {
-    getAllMarkets().then(({ games: g, source }) => {
-      setGames(g);
-      setDataSource(source);
-      setLoading(false);
-    });
+    function fetchMarkets() {
+      getAllMarkets().then(({ games: g, source }) => {
+        setGames(g);
+        setDataSource(source);
+        setLoading(false);
+        const triggered = checkAlerts(g);
+        if (triggered.length) setNotifications((prev) => [...prev, ...triggered]);
+      });
+    }
+    fetchMarkets();
+    const interval = setInterval(fetchMarkets, 60_000);
+    return () => clearInterval(interval);
   }, []);
 
   const now = Date.now();
@@ -237,6 +247,11 @@ function App() {
       {showLogin && (
         <LoginModal onLogin={handleLogin} onClose={() => setShowLogin(false)} />
       )}
+
+      <NotificationToast
+        notifications={notifications}
+        onDismiss={(id) => setNotifications((prev) => prev.filter((n) => n.id !== id))}
+      />
     </div>
   );
 }
