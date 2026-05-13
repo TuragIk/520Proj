@@ -1,6 +1,8 @@
 import os
 from datetime import datetime, date, timezone
 from typing import Optional
+from pydantic import BaseModel as PydanticBase
+from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -163,4 +165,25 @@ def place_bet(
         "price_at_entry": body.price_at_entry,
         "status": bet.status,
         "placed_at": bet.placed_at.isoformat() if bet.placed_at else None,
+    }
+
+class UpdateLimitsBody(PydanticBase):
+    max_bets_per_day: Optional[int] = None
+    max_daily_spend: Optional[float] = None
+
+@router.put("/users/me")
+def update_limits(body: UpdateLimitsBody, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    if body.max_bets_per_day is not None:
+        if body.max_bets_per_day < 1:
+            raise HTTPException(status_code=400, detail="max_bets_per_day must be at least 1")
+        current_user.max_bets_per_day = body.max_bets_per_day
+    if body.max_daily_spend is not None:
+        if body.max_daily_spend < 1:
+            raise HTTPException(status_code=400, detail="max_daily_spend must be at least 1")
+        current_user.max_daily_spend = body.max_daily_spend
+    db.commit()
+    db.refresh(current_user)
+    return {
+        "max_bets_per_day": current_user.max_bets_per_day,
+        "max_daily_spend": float(current_user.max_daily_spend),
     }

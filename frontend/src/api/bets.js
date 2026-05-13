@@ -112,3 +112,14 @@ export async function addBet({ game_id, event_name, platform, team, team_name, a
 
   return { ok: true, bet, limits: updated };
 }
+export async function updateLimits({ max_bets_per_day, max_daily_spend }) {
+  const token = localStorage.getItem("dg_token");
+  const res = await fetch("http://localhost:8000/users/me", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ max_bets_per_day, max_daily_spend }),
+  });
+  if (!res.ok) return { ok: false };
+  return { ok: true, data: await res.json() };
+}
+
