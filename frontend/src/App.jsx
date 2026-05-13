@@ -106,11 +106,11 @@ function App() {
         onLogout={handleLogout}
       />
       {page === "bets" ? (
-        <MyBetsPage bets={bets} limits={limits} user={user} onLoginClick={() => setShowLogin(true)} />
+        <MyBetsPage bets={bets} limits={limits} user={user} onLoginClick={() => setShowLogin(true)} onLimitsUpdated={(updated) => setLimits((prev) => ({ ...prev, max_bets_per_day: updated.max_bets_per_day, max_daily_amount: updated.max_daily_spend }))} />
       ) : (
       <div style={{ maxWidth: 960, margin: "0 auto", padding: "24px 20px" }}>
         {/* Limit warning */}
-        {isAtLimit(limits) && <LimitBanner limits={limits} />}
+        {user && isAtLimit(limits) && <LimitBanner limits={limits} />}
 
         {/* Source badge */}
         {dataSource && (

@@ -1,13 +1,10 @@
-// "My Bets" page showing the user's bet history and daily usage stats.
-// Shows a login prompt if the user isn't authenticated.
-// Stats (bets today, spent today, open bets) turn amber when the daily limit is approached.
-// Bets are read from localStorage via getBets() in App and passed down as props.
-
+import { useState } from "react";
 import { theme } from "../theme";
 import { fmtTime, fmtDate } from "../utils/formatters";
 import PlatformBadge from "../components/PlatformBadge";
+import { updateLimits } from "../api/bets";
 
-export default function MyBetsPage({ bets, limits, user, onLoginClick }) {
+export default function MyBetsPage({ bets, limits, user, onLoginClick, onLimitsUpdated }) {
   const openBets = bets.filter((b) => b.status === "open");
 
   if (!user) {
@@ -88,6 +85,9 @@ export default function MyBetsPage({ bets, limits, user, onLoginClick }) {
         />
       </div>
 
+      {/* User-editable daily limits */}
+      <LimitSettings limits={limits} onUpdated={onLimitsUpdated} />
+
       {/* Bet list */}
       {bets.length === 0 ? (
         <div
@@ -119,6 +119,75 @@ export default function MyBetsPage({ bets, limits, user, onLoginClick }) {
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+function LimitSettings({ limits, onUpdated }) {
+  const [maxBets, setMaxBets] = useState(limits.max_bets_per_day);
+  const [maxSpend, setMaxSpend] = useState(limits.max_daily_amount);
+  const [saved, setSaved] = useState(false);
+  const [error, setError] = useState(null);
+
+  async function handleSave(e) {
+    e.preventDefault();
+    setError(null);
+    const result = await updateLimits({
+      max_bets_per_day: parseInt(maxBets),
+      max_daily_spend: parseFloat(maxSpend),
+    });
+    if (result.ok) {
+      onUpdated(result.data);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } else {
+      setError("Failed to save — are you logged in?");
+    }
+  }
+
+  return (
+    <div
+      style={{
+        background: theme.colors.surface,
+        border: `1px solid ${theme.colors.border}`,
+        borderRadius: 14,
+        padding: "20px 24px",
+        marginBottom: 24,
+      }}
+    >
+      <div style={{ fontSize: 13, fontWeight: 700, color: theme.colors.text, fontFamily: theme.fonts.body, marginBottom: 14 }}>
+        Daily Limits
+      </div>
+      <form onSubmit={handleSave} style={{ display: "flex", gap: 12, alignItems: "flex-end", flexWrap: "wrap" }}>
+        <label style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 12, color: theme.colors.textDim, fontFamily: theme.fonts.body }}>
+          Max bets / day
+          <input
+            type="number"
+            min="1"
+            value={maxBets}
+            onChange={(e) => setMaxBets(e.target.value)}
+            style={{ padding: "8px 10px", borderRadius: 8, border: `1px solid ${theme.colors.border}`, background: theme.colors.bg, color: theme.colors.text, fontSize: 14, fontFamily: theme.fonts.mono, width: 90 }}
+          />
+        </label>
+        <label style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 12, color: theme.colors.textDim, fontFamily: theme.fonts.body }}>
+          Max spend / day ($)
+          <input
+            type="number"
+            min="1"
+            step="0.01"
+            value={maxSpend}
+            onChange={(e) => setMaxSpend(e.target.value)}
+            style={{ padding: "8px 10px", borderRadius: 8, border: `1px solid ${theme.colors.border}`, background: theme.colors.bg, color: theme.colors.text, fontSize: 14, fontFamily: theme.fonts.mono, width: 110 }}
+          />
+        </label>
+        <button
+          type="submit"
+          style={{ padding: "9px 20px", borderRadius: 8, border: "none", background: theme.colors.accent, color: "#000", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: theme.fonts.body }}
+        >
+          {saved ? "Saved!" : "Save"}
+        </button>
+      </form>
+      {error && <p style={{ margin: "8px 0 0", fontSize: 12, color: theme.colors.red, fontFamily: theme.fonts.body }}>{error}</p>}
     </div>
   );
 }
@@ -160,12 +229,14 @@ function StatCard({ label, value, warning }) {
 }
 
 function BetRow({ bet, last }) {
+  const isToday = new Date(bet.placed_at).toDateString() === new Date().toDateString();
+  const displayStatus = bet.status === "open" && !isToday ? "closed" : bet.status;
   const statusColor =
-    bet.status === "won"
+    displayStatus === "won"
       ? theme.colors.green
-      : bet.status === "lost"
+      : displayStatus === "lost" || displayStatus === "closed"
       ? theme.colors.red
-      : theme.colors.textMuted;
+      : theme.colors.green;
 
   return (
     <div
@@ -227,7 +298,7 @@ function BetRow({ bet, last }) {
           textAlign: "right",
         }}
       >
-        {bet.status}
+        {displayStatus}
       </div>
     </div>
   );

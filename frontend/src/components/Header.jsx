@@ -70,7 +70,7 @@ export default function Header({ page, onNavigate, betsCount, user, onLoginClick
 
         <NavButton active={page === "bets"} onClick={() => onNavigate("bets")}>
           My Bets
-          {betsCount > 0 && (
+          {user && betsCount > 0 && (
             <span
               style={{
                 marginLeft: 6,

@@ -1,4 +1,5 @@
 import logging
+logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(name)s:%(message)s")
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 
@@ -69,7 +70,7 @@ app = FastAPI(title="Dynamite Gambling API", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
     allow_origin_regex=r"http://localhost:\d+",
-    allow_methods=["GET", "POST"],
+    allow_methods=["GET", "POST", "PUT"],
     allow_headers=["*"],
 )
 
