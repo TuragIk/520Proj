@@ -4,7 +4,7 @@ React + Vite frontend for Dynamite Gambling. Displays live NBA odds aggregated f
 
 ## Prerequisites
 
-- Node.js 18+
+- Node.js 20+
 - Backend running at http://localhost:8000 (see backend/README.md)
 
 ## Setup
