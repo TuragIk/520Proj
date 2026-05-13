@@ -33,3 +33,15 @@ function transformGame(g) {
     platform_ids: { kalshi: null, polymarket: null },
   };
 }
+
+export async function fetchPriceHistory(gameId) {
+  try {
+    const resp = await fetch(`${API_BASE}/markets/${gameId}/history`, {
+      signal: AbortSignal.timeout(3000),
+    });
+    if (!resp.ok) return { history: [] };
+    return await resp.json();
+  } catch {
+    return { history: [] };
+  }
+}
