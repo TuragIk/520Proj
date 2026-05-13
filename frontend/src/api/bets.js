@@ -122,4 +122,19 @@ export async function updateLimits({ max_bets_per_day, max_daily_spend }) {
   if (!res.ok) return { ok: false };
   return { ok: true, data: await res.json() };
 }
-
+export async function fetchBets() {
+  const token = getToken();
+  if (!token || token === "mock-token") return [];
+  try {
+    const res = await fetch(`${API_BASE}/bets`, {
+      headers: { Authorization: `Bearer ${token}` },
+      signal: AbortSignal.timeout(3000),
+    });
+    if (!res.ok) return [];
+    const bets = await res.json();
+    localStorage.setItem(BETS_KEY, JSON.stringify(bets));
+    return bets;
+  } catch {
+    return getBets(); // backend offline — return what's cached
+  }
+}
