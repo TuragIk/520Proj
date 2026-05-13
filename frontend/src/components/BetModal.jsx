@@ -1,14 +1,10 @@
-// Modal opened when a user clicks a game card. Contains two sections:
-//   1. Platform links — always visible; lets anyone open the market on Kalshi or Polymarket.
-//   2. Log a Bet — gated: shows a sign-in prompt if logged out, a limit lockout with
-//      gambling resources if the daily limit is hit, or the bet form otherwise.
-
 import { useState } from "react";
 import { theme } from "../theme";
 import { fmtDate, fmtTime, pct } from "../utils/formatters";
 import PlatformBadge from "./PlatformBadge";
 import { addBet, getLimits } from "../api/bets";
 import { isAtLimit } from "./LimitBanner";
+import PriceHistoryChart from "./PriceHistoryChart";
 
 function platformUrl(platform) {
   if (platform === "kalshi") return "https://kalshi.com/markets/kxnbagame";
@@ -80,7 +76,9 @@ export default function BetModal({ game, limits, user, onClose, onBetLogged, onL
           borderRadius: 16,
           padding: 28,
           width: "100%",
-          maxWidth: 480,
+          maxWidth: 520,
+          maxHeight: "90vh",
+          overflowY: "auto",
         }}
       >
         {/* Header */}
@@ -132,6 +130,14 @@ export default function BetModal({ game, limits, user, onClose, onBetLogged, onL
               <span style={{ color: theme.colors.textDim, fontSize: 12 }}>Open →</span>
             </a>
           ))}
+        </div>
+
+        {/* Odds history chart */}
+        <p style={{ margin: "0 0 10px", fontSize: 11, textTransform: "uppercase", letterSpacing: "0.08em", color: theme.colors.textDim, fontFamily: theme.fonts.body }}>
+          Odds History (Favorite Win %)
+        </p>
+        <div style={{ marginBottom: 24 }}>
+          <PriceHistoryChart gameId={game.game_id} />
         </div>
 
         {/* Log a bet / lockout */}
