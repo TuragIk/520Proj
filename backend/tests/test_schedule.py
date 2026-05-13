@@ -7,16 +7,17 @@ FAKE_GAME = {
     "away_abbr": "NYK",
 }
 
-
 def test_schedule_no_games(client):
-    with patch("src.api.schedule.fetch_games_next_24h", return_value=[]):
+    with patch("src.api.schedule.get_redis", return_value=None), \
+         patch("src.api.schedule.fetch_games_next_24h", return_value=[]):
         r = client.get("/schedule/nba")
     assert r.status_code == 200
     assert r.json() == {"games": [], "count": 0}
 
 
 def test_schedule_with_games(client):
-    with patch("src.api.schedule.fetch_games_next_24h", return_value=[FAKE_GAME]):
+    with patch("src.api.schedule.get_redis", return_value=None), \
+         patch("src.api.schedule.fetch_games_next_24h", return_value=[FAKE_GAME]):
         r = client.get("/schedule/nba")
     assert r.status_code == 200
     body = r.json()
@@ -27,6 +28,7 @@ def test_schedule_with_games(client):
 
 
 def test_schedule_espn_error(client):
-    with patch("src.api.schedule.fetch_games_next_24h", side_effect=Exception("ESPN down")):
+    with patch("src.api.schedule.get_redis", return_value=None), \
+         patch("src.api.schedule.fetch_games_next_24h", side_effect=Exception("ESPN down")):
         r = client.get("/schedule/nba")
     assert r.status_code == 502
