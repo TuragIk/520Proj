@@ -5,13 +5,32 @@ A third-party platform that aggregates NBA prediction market data from Kalshi an
 ## Getting Started & Build Instructions
 
 **Requirements:** [Docker Desktop](https://www.docker.com/products/docker-desktop/), Python 3.12+, Node.js 20+
+
+You will need **three terminals** running simultaneously.
+
+**Terminal 1 — Start PostgreSQL and Redis** (from the project root):
 ```bash
-# Run this first from the project root — starts PostgreSQL and Redis
-docker-compose up -d
+docker compose up -d
 ```
 
-- **Backend:** See [backend/README.md](backend/README.md) for setup and API documentation.
-- **Frontend:** See [frontend/README.md](frontend/README.md) for setup and development instructions.
+**Terminal 2 — Start the backend** (from `backend/`):
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env
+uvicorn src.main:app --reload
+```
+API available at `http://localhost:8000`. Default login: `admin@dynamite.com` / `password123`.
+
+**Terminal 3 — Start the frontend** (from `frontend/`):
+```bash
+npm install
+npm run dev
+```
+App available at `http://localhost:5173`.
+
+For full API documentation see [backend/README.md](backend/README.md). For frontend details see [frontend/README.md](frontend/README.md).
 
 ## Team: Dynamite Gambling
 | Turag Ikbal/turagik |
