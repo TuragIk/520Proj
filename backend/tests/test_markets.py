@@ -41,14 +41,16 @@ FAKE_POLYMARKET_MARKET = {
 }
 
 def test_get_markets_no_games(client):
-    with patch("src.api.markets_unified.fetch_games_next_24h", return_value=[]):
+    with patch("src.api.markets_unified.get_redis", return_value=None), \
+         patch("src.api.markets_unified.fetch_games_next_24h", return_value=[]):
         r = client.get("/markets")
     assert r.status_code == 200
     assert r.json() == {"games": [], "count": 0}
 
 
 def test_get_markets_with_games(client):
-    with patch("src.api.markets_unified.fetch_games_next_24h", return_value=[FAKE_GAME]), \
+    with patch("src.api.markets_unified.get_redis", return_value=None), \
+         patch("src.api.markets_unified.fetch_games_next_24h", return_value=[FAKE_GAME]), \
          patch("src.api.markets_unified.kalshi_fetch", return_value=[FAKE_KALSHI_MARKET]), \
          patch("src.api.markets_unified.polymarket_fetch", return_value=FAKE_POLYMARKET_MARKET), \
          patch("src.api.markets_unified.normalize_game", return_value=FAKE_NORMALIZED):
@@ -64,7 +66,8 @@ def test_get_markets_with_games(client):
 
 
 def test_get_markets_espn_error(client):
-    with patch("src.api.markets_unified.fetch_games_next_24h", side_effect=Exception("ESPN down")):
+    with patch("src.api.markets_unified.get_redis", return_value=None), \
+         patch("src.api.markets_unified.fetch_games_next_24h", side_effect=Exception("ESPN down")):
         r = client.get("/markets")
     assert r.status_code == 502
 
