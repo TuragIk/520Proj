@@ -130,6 +130,12 @@ backend/
         └── seed.py             # Standalone dev seed script (auto-seeding is handled by main.py)
 ```
 
+
+## Testing
+
+To test the backend open up a venv from the backend folder. Then 'pip install -r requirements.txt'
+Lastly, 
+
 ## TODO 
 
 The polling pipeline and caching layer still need to be wired up:
@@ -143,3 +149,5 @@ The polling pipeline and caching layer still need to be wired up:
 - **DB writes**: on each poll, upsert a `Market` row per platform per game, then insert a `PriceHistory` row with the current normalized odds
 
 All the fetcher and normalization functions are already implemented and tested — this task is purely the scheduling and persistence wiring.
+
+
