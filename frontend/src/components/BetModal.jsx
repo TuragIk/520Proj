@@ -134,10 +134,10 @@ export default function BetModal({ game, limits, user, onClose, onBetLogged, onL
 
         {/* Odds history chart */}
         <p style={{ margin: "0 0 10px", fontSize: 11, textTransform: "uppercase", letterSpacing: "0.08em", color: theme.colors.textDim, fontFamily: theme.fonts.body }}>
-          Odds History (Favorite Win %)
+          Win Probability Over Time
         </p>
         <div style={{ marginBottom: 24 }}>
-          <PriceHistoryChart gameId={game.game_id} />
+          <PriceHistoryChart gameId={game.game_id} home={game.home} away={game.away} />
         </div>
 
         {/* Log a bet / lockout */}
