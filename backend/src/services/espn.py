@@ -1,3 +1,16 @@
+"""ESPN scoreboard fetcher.
+
+Queries the public ESPN NBA scoreboard for games starting in the next 24
+hours and normalizes the response into ``GameMatchup`` records that the
+Kalshi and Polymarket service modules consume as input. Team abbreviations
+are mapped against ``data/nba_teams.py`` so downstream services know which
+keywords to search each platform with.
+
+ESPN uses Eastern calendar dates rather than UTC, so this module computes
+the relevant date strings in EDT before hitting the scoreboard endpoint
+to avoid missing late-night games that fall into the next UTC day.
+"""
+
 from datetime import datetime, timedelta, timezone
 from typing import TypedDict
 

@@ -1,3 +1,16 @@
+"""Polymarket Gamma API client for NBA moneyline markets.
+
+Fetches a single moneyline market for a given matchup by constructing
+the event slug Polymarket uses for daily NBA games:
+``nba-{away}-{home}-{YYYY-MM-DD}``. The date component must be the game's
+Eastern date, not the UTC date, because Polymarket organizes its event
+listings by US calendar day.
+
+Returns ``None`` when no matching market exists (e.g. a game Polymarket
+chose not to list), which the normalization layer handles gracefully so
+the rest of a game's data is still returned.
+"""
+
 import json
 from datetime import datetime, timezone, timedelta
 from typing import TypedDict

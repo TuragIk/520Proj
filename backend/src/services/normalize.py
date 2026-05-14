@@ -1,3 +1,18 @@
+"""Cross-platform odds normalization and arbitrage detection.
+
+Takes raw outputs from the ESPN, Kalshi, and Polymarket clients and
+merges them into a single ``NormalizedGame`` shape with per-team odds
+side by side. This is the data normalization layer described in the
+project's design document — the rest of the system never sees raw
+platform-specific JSON.
+
+Arbitrage detection looks at the cheapest available "home" price and
+the cheapest available "away" price across platforms. If their sum is
+under \\$1 (with a small margin built in via the 0.99 threshold to
+account for spreads and fees), the difference is reported as guaranteed
+profit per \\$1 contract.
+"""
+
 from typing import TypedDict
 
 from .espn import GameMatchup
