@@ -176,3 +176,8 @@ pip uninstall -y psutil
 pip install --no-cache-dir psutil
 ```
 If the same error returns, your Python itself is x86_64 (running under Rosetta). Reinstall Python from python.org using the universal2 or arm64 installer, or via `brew install python@3.12`.
+
+## Testing
+
+To test the backend open up a venv from the backend folder. Then 'pip install -r requirements.txt'
+Lastly, 

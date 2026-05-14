@@ -94,6 +94,15 @@ To create a new account: POST http://localhost:8000/auth/register or use the API
 
 ---
 
+
+
+## Testing 
+
+To test the frontend run 'npm test' from the frontend folder. 
+
+
+
+
 ## localStorage Keys
 
 The app stores state in the browser. You can inspect or reset these via the browser console.
