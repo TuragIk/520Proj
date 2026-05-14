@@ -2,7 +2,7 @@
 // Falls back to MOCK_GAMES automatically if the backend is unreachable or times out (3s).
 // The source field in the return value ("live" | "mock") drives the status badge in App.jsx.
 
-import { MOCK_GAMES } from "../data/mockData";
+import { MOCK_GAMES, MOCK_PRICE_HISTORY } from "../data/mockData";
 import { teamColor } from "../data/teamData";
 
 const API_BASE = "http://localhost:8000";
@@ -42,6 +42,6 @@ export async function fetchPriceHistory(gameId) {
     if (!resp.ok) return { history: [] };
     return await resp.json();
   } catch {
-    return { history: [] };
+    return { history: MOCK_PRICE_HISTORY[gameId] ?? [] };
   }
 }
