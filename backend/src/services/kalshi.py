@@ -1,3 +1,16 @@
+"""Kalshi prediction-market client for NBA games.
+
+Wraps the public Kalshi trade API to fetch active markets in the
+``KXNBAGAME`` series, filtered to a specific matchup. The list endpoint
+returns slightly stale bid/ask prices, so each matched market is
+re-fetched individually for a fresh order-book quote before being handed
+to the normalization layer.
+
+Date filtering uses Eastern time because Kalshi's ``occurrence_datetime``
+field reflects the game's local start date — using UTC would
+incorrectly include or exclude late-night games.
+"""
+
 from datetime import datetime, timedelta, timezone
 from typing import TypedDict
 

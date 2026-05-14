@@ -130,16 +130,49 @@ backend/
         └── seed.py             # Standalone dev seed script (auto-seeding is handled by main.py)
 ```
 
-## TODO 
+## Troubleshooting
 
-The polling pipeline and caching layer still need to be wired up:
+Common issues encountered during local setup, and how to resolve them.
 
-- **APScheduler jobs** (add to `main.py` startup):
-  - Hourly: call `fetch_games_next_24h()` from `services/espn.py` to refresh the active game list
-  - Every 5 min: for each active game, call `fetch_markets_for_game()` (Kalshi) and `fetch_market_for_game()` (Polymarket), normalize via `normalize_game()`, write to Redis + DB
+### `role "dynamite" does not exist` when starting the backend
+PostgreSQL is running on port 5432 but it is not the Docker container — most likely a local Homebrew install of Postgres started automatically and grabbed the port before Docker could. Confirm with:
+```bash
+lsof -i :5432
+```
+If you see a `postgres` process owned by your user, stop it:
+```bash
+brew services stop postgresql@14   # adjust version as needed
+```
+Then re-run `docker-compose up -d` and restart the backend.
 
-- **Redis caching**: cache the output of `normalize_game()` per game with a TTL of ~5–6 minutes; update `GET /markets` to serve from cache (live fetch as fallback on cache miss)
+### `ModuleNotFoundError: No module named 'src'`
+The `uvicorn` command must be run from inside the `backend/` directory, not the project root. The module path `src.main:app` is relative to your current working directory.
 
-- **DB writes**: on each poll, upsert a `Market` row per platform per game, then insert a `PriceHistory` row with the current normalized odds
+### Port 5432 conflict on first `docker-compose up`
+If Docker reports the port is already in use, see the first troubleshooting entry above — stop the local Postgres process and try again. Alternatively, change the host port mapping in `docker-compose.yml` (e.g. `"5433:5432"`) and update `DATABASE_URL` in your `.env` to match.
 
-All the fetcher and normalization functions are already implemented and tested — this task is purely the scheduling and persistence wiring.
+### Backend starts but `/health` shows `db: disconnected`
+Either `DATABASE_URL` is missing from `.env`, or PostgreSQL is not actually reachable. Verify with:
+```bash
+docker-compose ps           # postgres container should be "Up"
+docker exec -it 520proj-postgres-1 pg_isready -U dynamite
+```
+
+### Schema change requires dropping a table
+This project does not use a migration tool yet (e.g. Alembic). When a column is added or renamed in `models.py`, the existing table must be dropped so SQLAlchemy can recreate it on startup. Example for `price_history`:
+```bash
+docker exec -it 520proj-postgres-1 psql -U dynamite -d dynamite \
+  -c "DROP TABLE IF EXISTS price_history CASCADE;"
+```
+The backend will recreate the table with the new schema on the next startup.
+
+### Redis client says `disconnected` in `/health`
+The Redis container is not running or `REDIS_URL` is wrong. The backend continues to function without Redis — every `GET /markets` recomputes data live instead of reading from cache — but external API quotas will be consumed faster.
+
+### `psutil` import error: "incompatible architecture (have 'x86_64', need 'arm64')"
+You are on an Apple Silicon Mac but a previously-installed Python package is the Intel build. Reinstall with the cache disabled so pip rebuilds:
+```bash
+pip uninstall -y psutil
+pip install --no-cache-dir psutil
+```
+If the same error returns, your Python itself is x86_64 (running under Rosetta). Reinstall Python from python.org using the universal2 or arm64 installer, or via `brew install python@3.12`.

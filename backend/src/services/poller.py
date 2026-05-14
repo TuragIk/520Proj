@@ -1,3 +1,26 @@
+"""Background polling job: full odds pipeline from external APIs to storage.
+
+``poll_and_cache()`` is the conductor for the entire data pipeline. It is
+scheduled by APScheduler in ``main.py`` to run once at backend startup
+and then every 5 minutes for the lifetime of the process.
+
+Each invocation:
+
+1. Pulls the list of NBA games starting in the next 24 hours from ESPN.
+2. For each game, fetches Kalshi and Polymarket markets independently
+   and normalizes the result into a ``NormalizedGame``.
+3. Writes the full collection to Redis under the single key
+   ``markets:all`` (TTL ``CACHE_TTL`` seconds) so user-facing reads from
+   ``GET /markets`` can be served instantly.
+4. Performs a DB write-through: upserts a ``Market`` row per
+   ``(external_id, platform)`` pair and inserts one ``PriceHistory`` row
+   per ``(market, platform, side)`` snapshot. This is what feeds the
+   price history chart over time.
+
+Errors fetching any individual platform are swallowed so a failure on
+one source does not block the rest of the pipeline.
+"""
+
 import json
 import logging
 from datetime import datetime, timezone
